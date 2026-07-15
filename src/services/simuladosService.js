@@ -1,5 +1,5 @@
 import { db } from './firebaseConfig';
-import { collection, addDoc, query, where, getDocs, orderBy, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 
 // Salva o resultado de um simulado concluido
 export async function salvarSimulado(dadosSimulado) {
