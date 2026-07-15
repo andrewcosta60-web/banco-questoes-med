@@ -11,6 +11,8 @@ import {
   cancelarRotacao,
 } from '../services/rotacoesService';
 import { salvarResposta } from '../services/questoesService';
+import Layout from '../components/Layout';
+import { cores, estilosBase } from '../styles/theme';
 
 export default function Rotacao() {
   const { rotacaoId } = useParams();
@@ -130,43 +132,43 @@ export default function Rotacao() {
 
   if (carregando) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="800px">
         <div style={styles.loadingBox}>Carregando...</div>
-      </div>
+      </Layout>
     );
   }
 
   if (erro) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="500px">
         <div style={styles.erroBox}>
           <p>{erro}</p>
           <button onClick={() => navigate('/dashboard')} style={styles.botaoVoltar}>
             Voltar ao Dashboard
           </button>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   // TELA DE AVISO (meta batida, sem área ativa, ou sem questões disponíveis)
   if (avisoSemArea) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="500px">
         <div style={styles.erroBox}>
-          <h3 style={{ marginTop: 0 }}>{rotacao?.nome}</h3>
+          <h3 style={{ marginTop: 0, color: cores.texto }}>{rotacao?.nome}</h3>
           <p>{avisoSemArea}</p>
           <button onClick={() => navigate('/dashboard')} style={styles.botaoVoltar}>
             Voltar ao Dashboard
           </button>
           <button
             onClick={handleCancelarRotacao}
-            style={{ ...styles.botaoVoltar, backgroundColor: '#dc3545', marginTop: '10px' }}
+            style={{ ...styles.botaoVoltar, ...styles.botaoCancelar, marginTop: '10px' }}
           >
             Cancelar esta Rotação
           </button>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -186,7 +188,7 @@ export default function Rotacao() {
   ];
 
   return (
-    <div style={styles.container}>
+    <Layout maxWidth="800px">
       <div style={styles.header}>
         <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
           Voltar
@@ -204,13 +206,13 @@ export default function Rotacao() {
 
         <p style={styles.enunciado}>{questaoAtual.enunciado}</p>
 
-{questaoAtual.imagens && questaoAtual.imagens.length > 0 && (
-  <div style={styles.imagensContainer}>
-    {questaoAtual.imagens.map((url, index) => (
-      <img key={index} src={url} alt={'Imagem ' + (index + 1)} style={styles.imagemQuestao} />
-    ))}
-  </div>
-)}  
+        {questaoAtual.imagens && questaoAtual.imagens.length > 0 && (
+          <div style={styles.imagensContainer}>
+            {questaoAtual.imagens.map((url, index) => (
+              <img key={index} src={url} alt={'Imagem ' + (index + 1)} style={styles.imagemQuestao} />
+            ))}
+          </div>
+        )}
 
         <div style={styles.alternativas}>
           {alternativas.map((alt) => {
@@ -243,8 +245,9 @@ export default function Rotacao() {
           <div
             style={{
               ...styles.resultadoBox,
-              backgroundColor:
-                respostaSelecionada === questaoAtual.gabarito ? '#d4edda' : '#f8d7da',
+              ...(respostaSelecionada === questaoAtual.gabarito
+                ? styles.resultadoBoxCerto
+                : styles.resultadoBoxErrado),
             }}
           >
             {respostaSelecionada === questaoAtual.gabarito
@@ -259,65 +262,40 @@ export default function Rotacao() {
           </button>
         )}
       </div>
-    </div>
+    </Layout>
   );
 }
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  },
   header: {
-    maxWidth: '800px',
-    margin: '0 auto 20px auto',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: cores.branco,
+    border: '1px solid ' + cores.borda,
     padding: '15px 20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    borderRadius: '10px',
+    marginBottom: '20px',
   },
-  btnVoltar: {
-    padding: '8px 16px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px',
-  },
+  btnVoltar: estilosBase.botaoSecundario,
   progresso: {
     fontWeight: '600',
-    color: '#333',
+    color: cores.texto,
   },
   card: {
-    maxWidth: '800px',
-    margin: '0 auto',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    ...estilosBase.card,
+    padding: '28px',
   },
   tags: {
     display: 'flex',
     gap: '10px',
     marginBottom: '20px',
   },
-  tag: {
-    padding: '4px 12px',
-    backgroundColor: '#e7f3ff',
-    color: '#007bff',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: '600',
-  },
+  tag: estilosBase.tag,
   enunciado: {
     fontSize: '17px',
     lineHeight: '1.6',
-    color: '#333',
+    color: cores.texto,
     marginBottom: '25px',
   },
   alternativas: {
@@ -329,78 +307,83 @@ const styles = {
   alternativa: {
     padding: '15px',
     textAlign: 'left',
-    border: '2px solid #ddd',
+    border: '1.5px solid ' + cores.borda,
     borderRadius: '8px',
-    backgroundColor: 'white',
+    backgroundColor: cores.branco,
     cursor: 'pointer',
     fontSize: '15px',
     lineHeight: '1.4',
+    fontFamily: 'inherit',
+    color: cores.texto,
   },
   alternativaSelecionada: {
-    borderColor: '#007bff',
-    backgroundColor: '#e7f3ff',
+    borderColor: cores.teal,
+    backgroundColor: cores.tealFundo,
   },
   alternativaCorreta: {
-    borderColor: '#28a745',
-    backgroundColor: '#d4edda',
+    borderColor: cores.teal,
+    backgroundColor: cores.tealFundo,
   },
   alternativaErrada: {
-    borderColor: '#dc3545',
-    backgroundColor: '#f8d7da',
+    borderColor: cores.perigo,
+    backgroundColor: cores.perigoFundo,
   },
   resultadoBox: {
     padding: '15px',
     borderRadius: '8px',
     textAlign: 'center',
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: '20px',
-    fontSize: '16px',
+    fontSize: '15px',
+  },
+  resultadoBoxCerto: {
+    backgroundColor: cores.tealFundo,
+    color: cores.sucessoTexto,
+  },
+  resultadoBoxErrado: {
+    backgroundColor: cores.perigoFundo,
+    color: cores.perigoTexto,
   },
   botaoProxima: {
+    ...estilosBase.botaoPrimario,
     width: '100%',
     padding: '15px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
+    fontSize: '15px',
   },
-  loadingBox: {
-    textAlign: 'center',
-    padding: '50px',
-    fontSize: '18px',
-  },
+  loadingBox: estilosBase.loadingBox,
   erroBox: {
-    maxWidth: '500px',
-    margin: '50px auto',
     textAlign: 'center',
-    backgroundColor: 'white',
+    backgroundColor: cores.branco,
+    border: '1px solid ' + cores.borda,
     padding: '30px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    borderRadius: '10px',
+    color: cores.texto,
   },
   botaoVoltar: {
     marginTop: '15px',
-    padding: '10px 20px',
-    backgroundColor: '#007bff',
-    color: 'white',
+    padding: '12px 20px',
+    backgroundColor: cores.teal,
+    color: cores.branco,
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '8px',
     cursor: 'pointer',
     display: 'block',
     width: '100%',
+    fontWeight: '700',
+    fontFamily: 'inherit',
+  },
+  botaoCancelar: {
+    backgroundColor: cores.perigo,
   },
   imagensContainer: {
-  marginBottom: '20px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '10px',
-},
-imagemQuestao: {
-  maxWidth: '100%',
-  borderRadius: '8px',
-  border: '1px solid #ddd',
-},
+    marginBottom: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+  },
+  imagemQuestao: {
+    maxWidth: '100%',
+    borderRadius: '8px',
+    border: '1px solid ' + cores.borda,
+  },
 };

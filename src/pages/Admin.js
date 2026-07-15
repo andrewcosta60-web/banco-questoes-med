@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 import { resetarRespostas, resetarSimulados, resetarRotacoes } from '../services/adminService';
+import Layout from '../components/Layout';
+import { cores, estilosBase } from '../styles/theme';
 
 export default function Admin() {
   const [executando, setExecutando] = useState(false);
@@ -41,7 +43,7 @@ export default function Admin() {
   };
 
   return (
-    <div style={styles.container}>
+    <Layout maxWidth="700px">
       <div style={styles.cardGrande}>
         <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
           Voltar ao Dashboard
@@ -106,56 +108,39 @@ export default function Admin() {
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingTop: '30px',
-  },
   cardGrande: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    maxWidth: '700px',
-    width: '100%',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    ...estilosBase.card,
+    padding: '28px',
   },
   btnVoltar: {
-    padding: '8px 16px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    marginBottom: '15px',
+    ...estilosBase.botaoSecundario,
+    marginBottom: '18px',
   },
   titulo: {
-    fontSize: '22px',
+    fontSize: '20px',
     marginBottom: '5px',
-    color: '#333',
+    color: cores.texto,
+    fontWeight: '700',
   },
   subtitulo: {
     fontSize: '13px',
-    color: '#666',
+    color: cores.textoSecundario,
     marginBottom: '25px',
   },
   secao: {
     marginBottom: '30px',
     paddingBottom: '25px',
-    borderBottom: '1px solid #eee',
+    borderBottom: '1px solid ' + cores.borda,
   },
   subtituloSecao: {
-    fontSize: '16px',
-    color: '#333',
+    fontSize: '15px',
+    color: cores.texto,
+    fontWeight: '700',
     marginBottom: '15px',
   },
   linhaBotoes: {
@@ -168,42 +153,43 @@ const styles = {
     minWidth: '200px',
     textAlign: 'center',
     padding: '14px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    borderRadius: '6px',
+    backgroundColor: cores.teal,
+    color: cores.branco,
+    borderRadius: '8px',
     textDecoration: 'none',
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: '14px',
   },
   secaoPerigo: {
-    backgroundColor: '#fff8f8',
-    border: '1px solid #f5c6cb',
-    borderRadius: '8px',
+    backgroundColor: cores.perigoFundo,
+    border: '1px solid ' + cores.perigo + '33',
+    borderRadius: '10px',
     padding: '20px',
   },
   subtituloPerigo: {
-    fontSize: '16px',
-    color: '#721c24',
+    fontSize: '15px',
+    color: cores.perigoTexto,
+    fontWeight: '700',
     marginBottom: '10px',
   },
   avisoTexto: {
     fontSize: '13px',
-    color: '#721c24',
+    color: cores.perigoTexto,
     marginBottom: '15px',
   },
   mensagemResultado: {
-    backgroundColor: '#d4edda',
-    color: '#155724',
+    backgroundColor: cores.tealFundo,
+    color: cores.sucessoTexto,
     padding: '10px',
-    borderRadius: '6px',
+    borderRadius: '8px',
     fontSize: '13px',
     marginBottom: '15px',
   },
   progressoBox: {
-    backgroundColor: '#fff3cd',
-    color: '#856404',
+    backgroundColor: cores.avisoFundo,
+    color: cores.avisoTexto,
     padding: '10px',
-    borderRadius: '6px',
+    borderRadius: '8px',
     fontSize: '13px',
     marginBottom: '15px',
   },
@@ -213,13 +199,8 @@ const styles = {
     gap: '10px',
   },
   botaoPerigo: {
+    ...estilosBase.botaoPerigo,
     padding: '14px',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
     fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
   },
 };

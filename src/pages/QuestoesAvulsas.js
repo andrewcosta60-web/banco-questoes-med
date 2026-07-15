@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 import { buscarTodasQuestoes, salvarResposta, embaralharArray } from '../services/questoesService';
+import { buscarCronogramasDisponiveis, areaDoCronogramaHoje } from '../services/cronogramasService';
+import Layout from '../components/Layout';
+import { cores, estilosBase } from '../styles/theme';
 
 export default function QuestoesAvulsas() {
   const [etapa, setEtapa] = useState('selecao');
   const [todasQuestoesCache, setTodasQuestoesCache] = useState([]);
+  const [modoSelecao, setModoSelecao] = useState('livre'); // 'livre' ou 'cronograma'
   const [misturarTudo, setMisturarTudo] = useState(true);
+  const [cronogramasDisponiveis, setCronogramasDisponiveis] = useState([]);
+  const [cronogramaEscolhidoId, setCronogramaEscolhidoId] = useState('');
   const [areasSelecionadas, setAreasSelecionadas] = useState([]);
   const [subareasSelecionadas, setSubareasSelecionadas] = useState([]);
 
@@ -21,19 +27,23 @@ export default function QuestoesAvulsas() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function carregarTudo() {
-      try {
-        setCarregando(true);
-        const dados = await buscarTodasQuestoes();
-        setTodasQuestoesCache(dados);
-      } catch (error) {
-        setErro('Erro ao carregar questoes: ' + error.message);
-      } finally {
-        setCarregando(false);
-      }
+  async function carregarTudo() {
+    try {
+      setCarregando(true);
+      const dados = await buscarTodasQuestoes();
+      setTodasQuestoesCache(dados);
+
+      const cronogramas = await buscarCronogramasDisponiveis(usuario.uid);
+      setCronogramasDisponiveis(cronogramas);
+    } catch (error) {
+      setErro('Erro ao carregar questoes: ' + error.message);
+    } finally {
+      setCarregando(false);
     }
-    carregarTudo();
-  }, []);
+  }
+  carregarTudo();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   // Reinicia o cronometro toda vez que a questao atual mudar (avançar ou voltar)
   useEffect(() => {
@@ -67,12 +77,29 @@ export default function QuestoesAvulsas() {
   };
 
   const handleIniciar = () => {
+  let questoesFiltradas = todasQuestoesCache;
+
+  if (modoSelecao === 'cronograma') {
+    if (!cronogramaEscolhidoId) {
+      setErro('Escolha um cronograma');
+      return;
+    }
+
+    const cronograma = cronogramasDisponiveis.find((c) => c.id === cronogramaEscolhidoId);
+    const areaHoje = areaDoCronogramaHoje(cronograma);
+
+    if (!areaHoje) {
+      setErro('Nenhum bloco desse cronograma esta ativo hoje.');
+      return;
+    }
+
+    questoesFiltradas = questoesFiltradas.filter((q) => q.area === areaHoje);
+  } else {
+    // modo livre
     if (!misturarTudo && areasSelecionadas.length === 0) {
       setErro('Escolha pelo menos uma area, ou marque "Todas as areas"');
       return;
     }
-
-    let questoesFiltradas = todasQuestoesCache;
 
     if (!misturarTudo) {
       questoesFiltradas = questoesFiltradas.filter((q) => areasSelecionadas.includes(q.area));
@@ -83,19 +110,20 @@ export default function QuestoesAvulsas() {
         );
       }
     }
+  }
 
-    if (questoesFiltradas.length === 0) {
-      setErro('Nenhuma questao encontrada para essa selecao.');
-      return;
-    }
+  if (questoesFiltradas.length === 0) {
+    setErro('Nenhuma questao encontrada para essa selecao.');
+    return;
+  }
 
-    setErro('');
-    const questoesEmbaralhadas = embaralharArray(questoesFiltradas);
-    setQuestoes(questoesEmbaralhadas);
-    setIndiceAtual(0);
-    setRespostasPorIndice({});
-    setEtapa('questoes');
-  };
+  setErro('');
+  const questoesEmbaralhadas = embaralharArray(questoesFiltradas);
+  setQuestoes(questoesEmbaralhadas);
+  setIndiceAtual(0);
+  setRespostasPorIndice({});
+  setEtapa('questoes');
+};
 
   const questaoAtual = questoes[indiceAtual];
   const respostaSelecionada = respostasPorIndice[indiceAtual] ?? null;
@@ -144,15 +172,15 @@ export default function QuestoesAvulsas() {
 
   if (carregando) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="600px">
         <div style={styles.loadingBox}>Carregando...</div>
-      </div>
+      </Layout>
     );
   }
 
   if (etapa === 'selecao') {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="600px">
         <div style={styles.card}>
           <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
             Voltar
@@ -163,17 +191,68 @@ export default function QuestoesAvulsas() {
           {erro && <div style={styles.erroBox}>{erro}</div>}
 
           <div style={styles.formGroup}>
-            <label style={styles.checkboxItemGrande}>
-              <input
-                type="checkbox"
-                checked={misturarTudo}
-                onChange={(e) => setMisturarTudo(e.target.checked)}
-              />
-              Todas as areas misturadas
-            </label>
+            <label style={styles.label}>Modo de Selecao</label>
+            <div style={styles.modoOpcoes}>
+              <button
+                type="button"
+                onClick={() => setModoSelecao('livre')}
+                style={{
+                  ...styles.modoBotao,
+                  ...(modoSelecao === 'livre' ? styles.modoBotaoAtivo : {}),
+                }}
+              >
+                Livre
+              </button>
+              <button
+                type="button"
+                onClick={() => setModoSelecao('cronograma')}
+                style={{
+                  ...styles.modoBotao,
+                  ...(modoSelecao === 'cronograma' ? styles.modoBotaoAtivo : {}),
+                }}
+                disabled={cronogramasDisponiveis.length === 0}
+              >
+                Associada a Cronograma
+              </button>
+            </div>
+            {cronogramasDisponiveis.length === 0 && (
+              <p style={styles.infoTexto}>
+                Voce ainda nao tem nenhum cronograma cadastrado.
+              </p>
+            )}
           </div>
 
-          {!misturarTudo && (
+          {modoSelecao === 'cronograma' && (
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Escolha o Cronograma</label>
+              <select
+                value={cronogramaEscolhidoId}
+                onChange={(e) => setCronogramaEscolhidoId(e.target.value)}
+                style={styles.input}
+              >
+                <option value="">Selecione...</option>
+                {cronogramasDisponiveis.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nome} {c.tipo === 'oficial' ? '(Oficial)' : '(Pessoal)'}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {modoSelecao === 'livre' && (
+            <div style={styles.formGroup}>
+              <label style={styles.checkboxItemGrande}>
+                <input
+                  type="checkbox"
+                  checked={misturarTudo}
+                  onChange={(e) => setMisturarTudo(e.target.checked)}
+                />
+                Todas as areas misturadas
+              </label>
+            </div>
+          )}
+          {modoSelecao === 'livre' && !misturarTudo && (
             <>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Escolha a(s) area(s)</label>
@@ -217,7 +296,7 @@ export default function QuestoesAvulsas() {
             Comecar
           </button>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -234,9 +313,9 @@ export default function QuestoesAvulsas() {
   ];
 
   return (
-    <div style={styles.container}>
+    <Layout maxWidth="800px">
       <div style={styles.header}>
-        <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
+        <button onClick={() => navigate('/dashboard')} style={styles.btnVoltarInline}>
           Sair
         </button>
         <div style={styles.progresso}>
@@ -258,13 +337,13 @@ export default function QuestoesAvulsas() {
 
         <p style={styles.enunciado}>{questaoAtual.enunciado}</p>
 
-{questaoAtual.imagens && questaoAtual.imagens.length > 0 && (
-  <div style={styles.imagensContainer}>
-    {questaoAtual.imagens.map((url, index) => (
-      <img key={index} src={url} alt={'Imagem ' + (index + 1)} style={styles.imagemQuestao} />
-    ))}
-  </div>
-)}
+        {questaoAtual.imagens && questaoAtual.imagens.length > 0 && (
+          <div style={styles.imagensContainer}>
+            {questaoAtual.imagens.map((url, index) => (
+              <img key={index} src={url} alt={'Imagem ' + (index + 1)} style={styles.imagemQuestao} />
+            ))}
+          </div>
+        )}
 
         <div style={styles.alternativas}>
           {alternativas.map((alt) => {
@@ -297,8 +376,9 @@ export default function QuestoesAvulsas() {
           <div
             style={{
               ...styles.resultadoBox,
-              backgroundColor:
-                respostaSelecionada === questaoAtual.gabarito ? '#d4edda' : '#f8d7da',
+              ...(respostaSelecionada === questaoAtual.gabarito
+                ? styles.resultadoBoxCerto
+                : styles.resultadoBoxErrado),
             }}
           >
             {respostaSelecionada === questaoAtual.gabarito
@@ -320,83 +400,69 @@ export default function QuestoesAvulsas() {
           </button>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  },
   header: {
-    maxWidth: '800px',
-    margin: '0 auto 20px auto',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: cores.branco,
+    border: '1px solid ' + cores.borda,
     padding: '15px 20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    borderRadius: '10px',
+    marginBottom: '20px',
   },
   btnVoltar: {
-    padding: '8px 16px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    marginBottom: '15px',
+    ...estilosBase.botaoSecundario,
+    marginBottom: '18px',
   },
+  btnVoltarInline: estilosBase.botaoSecundario,
   progresso: {
     fontWeight: '600',
-    color: '#333',
+    color: cores.texto,
   },
   placar: {
     fontWeight: '600',
-    color: '#28a745',
+    color: cores.teal,
     fontSize: '13px',
   },
   titulo: {
-    fontSize: '22px',
+    fontSize: '20px',
     marginBottom: '20px',
-    color: '#333',
+    color: cores.texto,
+    fontWeight: '700',
   },
   card: {
-    maxWidth: '600px',
-    margin: '0 auto',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    ...estilosBase.card,
+    padding: '28px',
   },
   formGroup: {
     marginBottom: '20px',
   },
-  label: {
-    display: 'block',
-    marginBottom: '8px',
-    fontWeight: '500',
-    color: '#333',
-    fontSize: '14px',
+  label: estilosBase.label,
+  infoTexto: {
+    fontSize: '12px',
+    color: cores.textoSecundario,
+    marginTop: '5px',
   },
   checkboxItemGrande: {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: '600',
     cursor: 'pointer',
+    color: cores.texto,
   },
   checkboxLista: {
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
+    border: '1px solid ' + cores.borda,
+    borderRadius: '8px',
     padding: '12px',
     maxHeight: '200px',
     overflowY: 'auto',
@@ -407,6 +473,7 @@ const styles = {
     gap: '8px',
     fontSize: '14px',
     cursor: 'pointer',
+    color: cores.texto,
   },
   tags: {
     display: 'flex',
@@ -414,35 +481,28 @@ const styles = {
     marginBottom: '20px',
     flexWrap: 'wrap',
   },
-  tag: {
-    padding: '4px 12px',
-    backgroundColor: '#e7f3ff',
-    color: '#007bff',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: '600',
-  },
+  tag: estilosBase.tag,
   tagDificuldade: {
-    backgroundColor: '#fff3cd',
-    color: '#856404',
+    backgroundColor: cores.avisoFundo,
+    color: cores.avisoTexto,
   },
   enunciado: {
     fontSize: '17px',
     lineHeight: '1.6',
-    color: '#333',
+    color: cores.texto,
     marginBottom: '25px',
   },
   imagensContainer: {
-  marginBottom: '20px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '10px',
-},
-imagemQuestao: {
-  maxWidth: '100%',
-  borderRadius: '8px',
-  border: '1px solid #ddd',
-},
+    marginBottom: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+  },
+  imagemQuestao: {
+    maxWidth: '100%',
+    borderRadius: '8px',
+    border: '1px solid ' + cores.borda,
+  },
   alternativas: {
     display: 'flex',
     flexDirection: 'column',
@@ -452,68 +512,78 @@ imagemQuestao: {
   alternativa: {
     padding: '15px',
     textAlign: 'left',
-    border: '2px solid #ddd',
+    border: '1.5px solid ' + cores.borda,
     borderRadius: '8px',
-    backgroundColor: 'white',
+    backgroundColor: cores.branco,
     cursor: 'pointer',
     fontSize: '15px',
     lineHeight: '1.4',
+    fontFamily: 'inherit',
+    color: cores.texto,
   },
   alternativaCorreta: {
-    borderColor: '#28a745',
-    backgroundColor: '#d4edda',
+    borderColor: cores.teal,
+    backgroundColor: cores.tealFundo,
   },
   alternativaErrada: {
-    borderColor: '#dc3545',
-    backgroundColor: '#f8d7da',
+    borderColor: cores.perigo,
+    backgroundColor: cores.perigoFundo,
   },
   resultadoBox: {
     padding: '15px',
     borderRadius: '8px',
     textAlign: 'center',
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: '20px',
-    fontSize: '16px',
+    fontSize: '15px',
+  },
+  resultadoBoxCerto: {
+    backgroundColor: cores.tealFundo,
+    color: cores.sucessoTexto,
+  },
+  resultadoBoxErrado: {
+    backgroundColor: cores.perigoFundo,
+    color: cores.perigoTexto,
   },
   navegacao: {
     display: 'flex',
     gap: '10px',
   },
   botaoNav: {
+    ...estilosBase.botaoSecundario,
     flex: 1,
     padding: '15px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
+    fontSize: '15px',
+    textAlign: 'center',
   },
   botaoProxima: {
+    ...estilosBase.botaoPrimario,
     flex: 2,
     width: '100%',
     padding: '15px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
+    fontSize: '15px',
+  },
+  loadingBox: estilosBase.loadingBox,
+  erroBox: estilosBase.erroBox,
+  modoOpcoes: {
+    display: 'flex',
+    gap: '10px',
+  },
+  modoBotao: {
+    flex: 1,
+    padding: '12px 10px',
+    border: '2px solid ' + cores.borda,
     borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '600',
+    backgroundColor: cores.branco,
     cursor: 'pointer',
-  },
-  loadingBox: {
-    textAlign: 'center',
-    padding: '50px',
-    fontSize: '18px',
-  },
-  erroBox: {
-    backgroundColor: '#fee',
-    border: '1px solid #fcc',
-    color: '#c00',
-    padding: '12px',
-    borderRadius: '6px',
-    marginBottom: '20px',
+    fontWeight: '600',
     fontSize: '14px',
+    fontFamily: 'inherit',
+    color: cores.texto,
+  },
+  modoBotaoAtivo: {
+    borderColor: cores.teal,
+    backgroundColor: cores.tealFundo,
+    color: cores.teal,
   },
 };

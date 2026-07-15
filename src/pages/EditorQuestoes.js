@@ -8,6 +8,8 @@ import {
   adicionarImagemNaQuestao,
   removerImagemDaQuestao,
 } from '../services/questoesService';
+import Layout from '../components/Layout';
+import { cores, estilosBase } from '../styles/theme';
 
 export default function EditorQuestoes() {
   const [modo, setModo] = useState('lista');
@@ -195,15 +197,15 @@ export default function EditorQuestoes() {
 
   if (carregando) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="800px">
         <div style={styles.loadingBox}>Carregando questoes...</div>
-      </div>
+      </Layout>
     );
   }
 
   if (modo === 'lista') {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="800px">
         <div style={styles.header}>
           <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
             Voltar
@@ -295,13 +297,13 @@ export default function EditorQuestoes() {
             </div>
           ))}
         </div>
-      </div>
+      </Layout>
     );
   }
 
   if (modo === 'edicao' && questaoEditando) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="700px">
         <div style={styles.cardGrande}>
           <div style={styles.previewHeader}>
             <button
@@ -430,11 +432,11 @@ export default function EditorQuestoes() {
                 disabled={uploadandoImagem}
                 style={styles.inputFile}
               />
-              <p style={{ fontSize: '12px', color: '#888', marginTop: '10px' }}>
+              <p style={styles.dicaColar}>
                 Ou clique aqui e aperte Ctrl+V para colar uma imagem copiada
               </p>
               {uploadandoImagem && (
-                <p style={{ fontSize: '13px', color: '#666' }}>
+                <p style={styles.progressoTexto}>
                   Enviando imagem... {progressoUpload}%
                 </p>
               )}
@@ -454,7 +456,7 @@ export default function EditorQuestoes() {
             </button>
           </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -462,71 +464,42 @@ export default function EditorQuestoes() {
 }
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  },
   header: {
-    maxWidth: '800px',
-    margin: '0 auto 20px auto',
     display: 'flex',
     alignItems: 'center',
     gap: '15px',
+    marginBottom: '20px',
   },
-  btnVoltar: {
-    padding: '8px 16px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-  },
+  btnVoltar: estilosBase.botaoSecundario,
   titulo: {
     fontSize: '18px',
-    color: '#333',
+    color: cores.texto,
+    fontWeight: '700',
     margin: 0,
   },
   filtrosContainer: {
-    maxWidth: '800px',
-    margin: '0 auto 20px auto',
     display: 'flex',
     gap: '15px',
     flexWrap: 'wrap',
+    marginBottom: '20px',
   },
   formGroupFiltro: {
     flex: 1,
     minWidth: '150px',
   },
-  labelPequeno: {
-    display: 'block',
-    marginBottom: '4px',
-    fontWeight: '500',
-    color: '#666',
-    fontSize: '12px',
-  },
+  labelPequeno: estilosBase.labelPequeno,
   inputBusca: {
-    width: '100%',
+    ...estilosBase.input,
     padding: '12px',
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    fontSize: '14px',
-    boxSizing: 'border-box',
-    fontFamily: 'inherit',
   },
   lista: {
-    maxWidth: '800px',
-    margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
   },
   itemLista: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
+    ...estilosBase.card,
     padding: '15px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
     display: 'flex',
     alignItems: 'center',
     gap: '15px',
@@ -534,7 +507,7 @@ const styles = {
   },
   itemNumero: {
     fontWeight: '700',
-    color: '#007bff',
+    color: cores.teal,
     fontSize: '14px',
     minWidth: '40px',
   },
@@ -547,61 +520,31 @@ const styles = {
     marginBottom: '6px',
     flexWrap: 'wrap',
   },
-  tag: {
-    padding: '3px 8px',
-    backgroundColor: '#e7f3ff',
-    color: '#007bff',
-    borderRadius: '12px',
-    fontSize: '11px',
-    fontWeight: '600',
-  },
+  tag: estilosBase.tag,
   tagImagem: {
     padding: '3px 8px',
-    backgroundColor: '#fff3cd',
-    color: '#856404',
+    backgroundColor: cores.avisoFundo,
+    color: cores.avisoTexto,
     borderRadius: '12px',
     fontSize: '11px',
-    fontWeight: '600',
+    fontWeight: '700',
   },
   itemEnunciado: {
     fontSize: '13px',
-    color: '#555',
+    color: cores.textoTerciario,
     margin: 0,
   },
   itemSeta: {
     fontSize: '13px',
-    color: '#007bff',
-    fontWeight: '600',
+    color: cores.teal,
+    fontWeight: '700',
   },
-  vazioBox: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    textAlign: 'center',
-    color: '#666',
-  },
-  erroBox: {
-    maxWidth: '800px',
-    margin: '0 auto 20px auto',
-    backgroundColor: '#fee',
-    border: '1px solid #fcc',
-    color: '#c00',
-    padding: '12px',
-    borderRadius: '6px',
-    fontSize: '14px',
-  },
-  loadingBox: {
-    textAlign: 'center',
-    padding: '50px',
-    fontSize: '18px',
-  },
+  vazioBox: estilosBase.vazioBox,
+  erroBox: estilosBase.erroBox,
+  loadingBox: estilosBase.loadingBox,
   cardGrande: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    maxWidth: '700px',
-    margin: '0 auto',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    ...estilosBase.card,
+    padding: '28px',
   },
   previewHeader: {
     display: 'flex',
@@ -611,8 +554,8 @@ const styles = {
   },
   previewContador: {
     fontSize: '14px',
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: '700',
+    color: cores.texto,
   },
   linhaDupla: {
     display: 'flex',
@@ -622,34 +565,20 @@ const styles = {
     marginBottom: '15px',
     flex: 1,
   },
-  input: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '14px',
-    boxSizing: 'border-box',
-    fontFamily: 'inherit',
-  },
+  input: estilosBase.input,
   inputGabarito: {
-    borderColor: '#28a745',
-    backgroundColor: '#f0fff4',
+    borderColor: cores.teal,
+    backgroundColor: cores.tealFundo,
   },
   textarea: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '14px',
-    boxSizing: 'border-box',
-    fontFamily: 'inherit',
+    ...estilosBase.input,
     resize: 'vertical',
   },
   secaoImagens: {
     marginTop: '20px',
     marginBottom: '20px',
     paddingTop: '20px',
-    borderTop: '1px solid #eee',
+    borderTop: '1px solid ' + cores.borda,
   },
   gridImagens: {
     display: 'grid',
@@ -666,26 +595,36 @@ const styles = {
     width: '100%',
     height: '100px',
     objectFit: 'cover',
-    borderRadius: '6px',
-    border: '1px solid #ddd',
+    borderRadius: '8px',
+    border: '1px solid ' + cores.borda,
   },
   btnRemoverImagem: {
-    padding: '5px',
-    backgroundColor: '#dc3545',
-    color: 'white',
+    padding: '6px',
+    backgroundColor: cores.perigoFundo,
+    color: cores.perigoTexto,
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '6px',
     cursor: 'pointer',
     fontSize: '11px',
+    fontFamily: 'inherit',
   },
   uploadBox: {
     padding: '15px',
-    border: '2px dashed #ddd',
+    border: '2px dashed ' + cores.borda,
     borderRadius: '8px',
     textAlign: 'center',
   },
   inputFile: {
     fontSize: '13px',
+  },
+  dicaColar: {
+    fontSize: '12px',
+    color: cores.textoSecundario,
+    marginTop: '10px',
+  },
+  progressoTexto: {
+    fontSize: '13px',
+    color: cores.textoTerciario,
   },
   botoesAcao: {
     display: 'flex',
@@ -693,24 +632,14 @@ const styles = {
     marginTop: '20px',
   },
   btnDeletar: {
+    ...estilosBase.botaoPerigo,
     padding: '12px 20px',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
     fontSize: '14px',
-    fontWeight: '600',
   },
   btnSalvar: {
+    ...estilosBase.botaoPrimario,
     flex: 1,
     padding: '12px 20px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
     fontSize: '14px',
-    fontWeight: '600',
   },
 };

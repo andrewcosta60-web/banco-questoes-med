@@ -2,9 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 import { criarRotacao, buscarAreasDisponiveis } from '../services/rotacoesService';
+import { buscarCronogramasDisponiveis } from '../services/cronogramasService';
+import Layout from '../components/Layout';
+import { cores, estilosBase } from '../styles/theme';
 
 export default function CriarRotacao() {
+
   const [nome, setNome] = useState('');
+  const [cronogramasDisponiveis, setCronogramasDisponiveis] = useState([]);
+  const [cronogramaEscolhidoId, setCronogramaEscolhidoId] = useState('');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
   const [metaBase, setMetaBase] = useState(20);
@@ -22,18 +28,22 @@ export default function CriarRotacao() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function carregarAreas() {
-      try {
-        const areas = await buscarAreasDisponiveis();
-        setAreasDisponiveis(areas);
-      } catch (error) {
-        setErro('Erro ao carregar areas: ' + error.message);
-      } finally {
-        setCarregandoAreas(false);
-      }
+  async function carregarDados() {
+    try {
+      const areas = await buscarAreasDisponiveis();
+      setAreasDisponiveis(areas);
+
+      const cronogramas = await buscarCronogramasDisponiveis(usuario.uid);
+      setCronogramasDisponiveis(cronogramas);
+    } catch (error) {
+      setErro('Erro ao carregar dados: ' + error.message);
+    } finally {
+      setCarregandoAreas(false);
     }
-    carregarAreas();
-  }, []);
+  }
+  carregarDados();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   const toggleAreaMisturada = (area) => {
     setAreasMisturadas((prev) =>
@@ -117,27 +127,27 @@ export default function CriarRotacao() {
 
   if (carregandoAreas) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="600px">
         <div style={styles.card}>Carregando areas disponiveis...</div>
-      </div>
+      </Layout>
     );
   }
 
   if (areasDisponiveis.length === 0) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="600px">
         <div style={styles.card}>
           <p>Nenhuma area com questoes cadastradas ainda.</p>
           <button onClick={() => navigate('/dashboard')} style={styles.botao}>
             Voltar ao Dashboard
           </button>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div style={styles.container}>
+    <Layout maxWidth="600px">
       <div style={styles.card}>
         <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
           Voltar
@@ -319,41 +329,24 @@ export default function CriarRotacao() {
           </button>
         </form>
       </div>
-    </div>
+    </Layout>
   );
 }
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingTop: '30px',
-  },
   card: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    maxWidth: '600px',
-    width: '100%',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    ...estilosBase.card,
+    padding: '28px',
   },
   btnVoltar: {
-    padding: '8px 16px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    marginBottom: '20px',
+    ...estilosBase.botaoSecundario,
+    marginBottom: '18px',
   },
   titulo: {
-    fontSize: '22px',
+    fontSize: '20px',
     marginBottom: '20px',
-    color: '#333',
+    color: cores.texto,
+    fontWeight: '700',
   },
   formGroup: {
     marginBottom: '18px',
@@ -363,49 +356,11 @@ const styles = {
     display: 'flex',
     gap: '15px',
   },
-  label: {
-    display: 'block',
-    marginBottom: '6px',
-    fontWeight: '500',
-    color: '#333',
-    fontSize: '14px',
-  },
-  labelPequeno: {
-    display: 'block',
-    marginBottom: '4px',
-    fontWeight: '500',
-    color: '#666',
-    fontSize: '12px',
-  },
-  input: {
-    width: '100%',
-    padding: '12px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '15px',
-    boxSizing: 'border-box',
-    fontFamily: 'inherit',
-  },
-  erroBox: {
-    backgroundColor: '#fee',
-    border: '1px solid #fcc',
-    color: '#c00',
-    padding: '12px',
-    borderRadius: '6px',
-    marginBottom: '20px',
-    fontSize: '14px',
-  },
-  botao: {
-    width: '100%',
-    padding: '14px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
-  },
+  label: estilosBase.label,
+  labelPequeno: estilosBase.labelPequeno,
+  input: estilosBase.input,
+  erroBox: estilosBase.erroBox,
+  botao: estilosBase.botaoPrimario,
   modoOpcoes: {
     display: 'flex',
     gap: '10px',
@@ -413,32 +368,34 @@ const styles = {
   modoBotao: {
     flex: 1,
     padding: '15px 10px',
-    border: '2px solid #ddd',
+    border: '2px solid ' + cores.borda,
     borderRadius: '8px',
-    backgroundColor: 'white',
+    backgroundColor: cores.branco,
     cursor: 'pointer',
     display: 'flex',
     flexDirection: 'column',
     gap: '5px',
     fontWeight: '600',
     fontSize: '14px',
+    fontFamily: 'inherit',
+    color: cores.texto,
   },
   modoBotaoAtivo: {
-    borderColor: '#007bff',
-    backgroundColor: '#e7f3ff',
-    color: '#007bff',
+    borderColor: cores.teal,
+    backgroundColor: cores.tealFundo,
+    color: cores.teal,
   },
   modoDescricao: {
     fontSize: '11px',
     fontWeight: '400',
-    color: '#888',
+    color: cores.textoSecundario,
   },
   checkboxLista: {
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
+    border: '1px solid ' + cores.borda,
+    borderRadius: '8px',
     padding: '12px',
     maxHeight: '200px',
     overflowY: 'auto',
@@ -449,31 +406,29 @@ const styles = {
     gap: '8px',
     fontSize: '14px',
     cursor: 'pointer',
+    color: cores.texto,
   },
   blocoCard: {
-    border: '1px solid #ddd',
+    border: '1px solid ' + cores.borda,
     borderRadius: '8px',
     padding: '15px',
     marginBottom: '15px',
-    backgroundColor: '#fafafa',
+    backgroundColor: cores.fundoPagina,
   },
   btnRemoverBloco: {
-    padding: '6px 12px',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
+    ...estilosBase.botaoPerigo,
+    padding: '7px 12px',
     fontSize: '12px',
   },
   btnAdicionarBloco: {
     width: '100%',
     padding: '10px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
+    backgroundColor: cores.tealFundo,
+    color: cores.teal,
+    border: '1px dashed ' + cores.teal,
+    borderRadius: '8px',
     cursor: 'pointer',
     fontWeight: '600',
+    fontFamily: 'inherit',
   },
 };

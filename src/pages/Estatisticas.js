@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 import { buscarTodasRespostas, calcularEstatisticas } from '../services/estatisticasService';
+import Layout from '../components/Layout';
+import { cores, estilosBase } from '../styles/theme';
 
 export default function Estatisticas() {
   const [stats, setStats] = useState(null);
@@ -40,23 +42,23 @@ export default function Estatisticas() {
 
   if (carregando) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="700px">
         <div style={styles.loadingBox}>Carregando estatisticas...</div>
-      </div>
+      </Layout>
     );
   }
 
   if (erro) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="700px">
         <div style={styles.erroBox}>{erro}</div>
-      </div>
+      </Layout>
     );
   }
 
   if (!stats || stats.total === 0) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="700px">
         <div style={styles.header}>
           <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
             Voltar
@@ -66,7 +68,7 @@ export default function Estatisticas() {
         <div style={styles.vazioBox}>
           <p>Voce ainda nao respondeu nenhuma questao. Comece a estudar para ver suas estatisticas aqui!</p>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -77,7 +79,7 @@ export default function Estatisticas() {
   });
 
   return (
-    <div style={styles.container}>
+    <Layout maxWidth="700px">
       <div style={styles.header}>
         <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
           Voltar
@@ -93,11 +95,11 @@ export default function Estatisticas() {
             <div style={styles.resumoLabel}>Questoes Respondidas</div>
           </div>
           <div style={styles.resumoItem}>
-            <div style={{ ...styles.resumoValor, color: '#28a745' }}>{stats.acertos}</div>
+            <div style={{ ...styles.resumoValor, color: cores.teal }}>{stats.acertos}</div>
             <div style={styles.resumoLabel}>Acertos</div>
           </div>
           <div style={styles.resumoItem}>
-            <div style={{ ...styles.resumoValor, color: '#007bff' }}>{stats.percentualGeral}%</div>
+            <div style={{ ...styles.resumoValor, color: cores.teal }}>{stats.percentualGeral}%</div>
             <div style={styles.resumoLabel}>Aproveitamento Geral</div>
           </div>
         </div>
@@ -111,7 +113,7 @@ export default function Estatisticas() {
           return (
             <div key={tipo} style={styles.itemLinha}>
               <span>{traduzirTipo(tipo)}</span>
-              <span style={{ fontWeight: '600', color: pct >= 60 ? '#28a745' : '#dc3545' }}>
+              <span style={{ fontWeight: '700', color: pct >= 60 ? cores.teal : cores.perigo }}>
                 {dados.acertos} / {dados.total} ({pct}%)
               </span>
             </div>
@@ -130,7 +132,7 @@ export default function Estatisticas() {
               <div key={area} style={styles.itemAreaComBarra}>
                 <div style={styles.itemAreaTopo}>
                   <span>{area}</span>
-                  <span style={{ fontWeight: '600', color: pct >= 60 ? '#28a745' : '#dc3545' }}>
+                  <span style={{ fontWeight: '700', color: pct >= 60 ? cores.teal : cores.perigo }}>
                     {dados.acertos} / {dados.total} ({pct}%)
                   </span>
                 </div>
@@ -139,7 +141,7 @@ export default function Estatisticas() {
                     style={{
                       ...styles.barraPreenchida,
                       width: pct + '%',
-                      backgroundColor: pct >= 60 ? '#28a745' : '#dc3545',
+                      backgroundColor: pct >= 60 ? cores.teal : cores.perigo,
                     }}
                   />
                 </div>
@@ -183,7 +185,7 @@ export default function Estatisticas() {
                   {dados.subarea || 'Sem subarea'}
                   <span style={styles.itemSubareaArea}> ({dados.area})</span>
                 </span>
-                <span style={{ fontWeight: '600', color: pct >= 60 ? '#28a745' : '#dc3545' }}>
+                <span style={{ fontWeight: '700', color: pct >= 60 ? cores.teal : cores.perigo }}>
                   {dados.acertos} / {dados.total} ({pct}%)
                 </span>
               </div>
@@ -201,8 +203,8 @@ export default function Estatisticas() {
               <span
                 style={{
                   ...styles.badgeRecente,
-                  backgroundColor: r.correta ? '#d4edda' : '#f8d7da',
-                  color: r.correta ? '#155724' : '#721c24',
+                  backgroundColor: r.correta ? cores.tealFundo : cores.perigoFundo,
+                  color: r.correta ? cores.sucessoTexto : cores.perigoTexto,
                 }}
               >
                 {r.correta ? 'Acertou' : 'Errou'}
@@ -215,44 +217,28 @@ export default function Estatisticas() {
           </div>
         ))}
       </div>
-    </div>
+    </Layout>
   );
 }
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  },
   header: {
-    maxWidth: '700px',
-    margin: '0 auto 20px auto',
     display: 'flex',
     alignItems: 'center',
     gap: '15px',
+    marginBottom: '20px',
   },
-  btnVoltar: {
-    padding: '8px 16px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-  },
+  btnVoltar: estilosBase.botaoSecundario,
   titulo: {
-    fontSize: '18px',
-    color: '#333',
+    fontSize: '20px',
+    color: cores.texto,
+    fontWeight: '700',
     margin: 0,
   },
   card: {
-    maxWidth: '700px',
-    margin: '0 auto 15px auto',
-    backgroundColor: 'white',
-    borderRadius: '8px',
+    ...estilosBase.card,
     padding: '20px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    marginBottom: '15px',
   },
   gridResumo: {
     display: 'grid',
@@ -262,24 +248,20 @@ const styles = {
   resumoItem: {
     textAlign: 'center',
     padding: '15px 10px',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: cores.fundoPagina,
     borderRadius: '8px',
   },
   resumoValor: {
     fontSize: '24px',
     fontWeight: '700',
-    color: '#333',
+    color: cores.texto,
   },
   resumoLabel: {
     fontSize: '12px',
-    color: '#666',
+    color: cores.textoSecundario,
     marginTop: '5px',
   },
-  subtitulo: {
-    fontSize: '15px',
-    color: '#333',
-    margin: '0 0 15px 0',
-  },
+  subtitulo: estilosBase.subtitulo,
   subtituloComFiltro: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -294,28 +276,30 @@ const styles = {
   },
   botaoOrdenar: {
     padding: '6px 12px',
-    backgroundColor: '#f0f0f0',
-    color: '#666',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
+    backgroundColor: cores.branco,
+    color: cores.textoSecundario,
+    border: '1px solid ' + cores.borda,
+    borderRadius: '8px',
     fontSize: '11px',
     cursor: 'pointer',
+    fontFamily: 'inherit',
   },
   botaoOrdenarAtivo: {
-    backgroundColor: '#007bff',
-    color: 'white',
-    borderColor: '#007bff',
+    backgroundColor: cores.teal,
+    color: cores.branco,
+    borderColor: cores.teal,
   },
   itemLinha: {
     display: 'flex',
     justifyContent: 'space-between',
     padding: '10px 0',
-    borderBottom: '1px solid #f0f0f0',
+    borderBottom: '1px solid ' + cores.borda,
     fontSize: '13px',
+    color: cores.texto,
   },
   itemSubareaArea: {
     fontSize: '11px',
-    color: '#999',
+    color: cores.textoSecundario,
     marginLeft: '5px',
   },
   itemAreaComBarra: {
@@ -326,11 +310,12 @@ const styles = {
     justifyContent: 'space-between',
     fontSize: '13px',
     marginBottom: '5px',
+    color: cores.texto,
   },
   barraFundo: {
     width: '100%',
     height: '8px',
-    backgroundColor: '#e9ecef',
+    backgroundColor: cores.fundoPagina,
     borderRadius: '4px',
     overflow: 'hidden',
   },
@@ -347,7 +332,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '10px 0',
-    borderBottom: '1px solid #f0f0f0',
+    borderBottom: '1px solid ' + cores.borda,
     fontSize: '12px',
     flexWrap: 'wrap',
     gap: '5px',
@@ -356,38 +341,17 @@ const styles = {
     padding: '3px 8px',
     borderRadius: '10px',
     fontSize: '11px',
-    fontWeight: '600',
+    fontWeight: '700',
     marginRight: '8px',
   },
   itemRecenteTexto: {
-    color: '#555',
+    color: cores.textoTerciario,
   },
   itemRecenteData: {
-    color: '#999',
+    color: cores.textoSecundario,
     fontSize: '11px',
   },
-  vazioBox: {
-    maxWidth: '700px',
-    margin: '0 auto',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    textAlign: 'center',
-    color: '#666',
-  },
-  erroBox: {
-    maxWidth: '700px',
-    margin: '0 auto',
-    backgroundColor: '#fee',
-    border: '1px solid #fcc',
-    color: '#c00',
-    padding: '12px',
-    borderRadius: '6px',
-    fontSize: '14px',
-  },
-  loadingBox: {
-    textAlign: 'center',
-    padding: '50px',
-    fontSize: '18px',
-  },
+  vazioBox: estilosBase.vazioBox,
+  erroBox: estilosBase.erroBox,
+  loadingBox: estilosBase.loadingBox,
 };

@@ -15,6 +15,8 @@ import Simulado from './pages/Simulado';
 import HistoricoSimulados from './pages/HistoricoSimulados';
 import Estatisticas from './pages/Estatisticas';
 import Admin from './pages/Admin';
+import Cronogramas from './pages/Cronogramas';
+import EditarPerfil from './pages/EditarPerfil';
 
 function ProtectedRoute({ children }) {
   const { usuario, carregando } = useAuth();
@@ -35,6 +37,22 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+<Route
+  path="/editar-perfil"
+  element={
+    <ProtectedRoute>
+      <EditarPerfil />
+    </ProtectedRoute>
+  }
+/>
+          <Route
+  path="/cronogramas"
+  element={
+    <ProtectedRoute>
+      <Cronogramas />
+    </ProtectedRoute>
+  }
+/>
           <Route
   path="/admin"
   element={

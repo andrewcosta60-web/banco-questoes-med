@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
+import { cores } from '../styles/theme';
 
 export default function Signup() {
   const [nome, setNome] = useState('');
@@ -67,7 +68,10 @@ export default function Signup() {
       <div style={styles.card}>
         {/* HEADER */}
         <div style={styles.header}>
-          <h1 style={styles.titulo}>🏥 Banco de Questões</h1>
+          <div style={styles.marca}>
+            <div style={styles.marcaPonto} />
+            <h1 style={styles.titulo}>Banco de Questões</h1>
+          </div>
           <p style={styles.subtitulo}>Crie sua conta e comece a estudar</p>
         </div>
 
@@ -77,7 +81,6 @@ export default function Signup() {
 
           {erro && (
             <div style={styles.erroBox}>
-              <span style={styles.erroIcon}>⚠️</span>
               <span>{erro}</span>
             </div>
           )}
@@ -130,14 +133,14 @@ export default function Signup() {
                 disabled={carregando}
                 tabIndex={-1}
               >
-                {mostrarSenha ? '🙈' : '👁️'}
+                {mostrarSenha ? 'Ocultar' : 'Ver'}
               </button>
             </div>
             {/* Indicador de validação */}
             {senha.length > 0 && (
               <p style={{
                 ...styles.validacaoTexto,
-                color: validacoes.senhaLength ? '#28a745' : '#dc3545',
+                color: validacoes.senhaLength ? cores.teal : cores.perigo,
               }}>
                 {validacoes.senhaLength ? '✓' : '✗'} Pelo menos 6 caracteres
               </p>
@@ -159,7 +162,7 @@ export default function Signup() {
             {confirmarSenha.length > 0 && (
               <p style={{
                 ...styles.validacaoTexto,
-                color: validacoes.senhasIguais ? '#28a745' : '#dc3545',
+                color: validacoes.senhasIguais ? cores.teal : cores.perigo,
               }}>
                 {validacoes.senhasIguais ? '✓' : '✗'} Senhas conferem
               </p>
@@ -176,7 +179,7 @@ export default function Signup() {
             }}
             disabled={carregando}
           >
-            {carregando ? '⏳ Criando conta...' : '✓ Criar Conta'}
+            {carregando ? 'Criando conta...' : 'Criar Conta'}
           </button>
         </form>
 
@@ -200,41 +203,55 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: cores.fundoPagina,
     padding: '20px',
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: cores.branco,
+    border: '1px solid ' + cores.borda,
     borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    maxWidth: '450px',
+    maxWidth: '440px',
     width: '100%',
     overflow: 'hidden',
   },
   header: {
-    backgroundColor: '#28a745',
-    color: 'white',
-    padding: '30px 20px',
+    backgroundColor: cores.navy,
+    color: cores.branco,
+    padding: '30px 24px',
     textAlign: 'center',
   },
+  marca: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    marginBottom: '8px',
+  },
+  marcaPonto: {
+    width: '9px',
+    height: '9px',
+    borderRadius: '50%',
+    backgroundColor: cores.teal,
+    flexShrink: 0,
+  },
   titulo: {
-    margin: '0 0 10px 0',
-    fontSize: '26px',
-    fontWeight: 'bold',
+    margin: 0,
+    fontSize: '22px',
+    fontWeight: '700',
   },
   subtitulo: {
     margin: 0,
-    fontSize: '14px',
-    opacity: 0.9,
+    fontSize: '13.5px',
+    color: cores.textoClaro,
   },
   form: {
-    padding: '30px 20px',
+    padding: '28px 24px',
   },
   formTitulo: {
-    fontSize: '22px',
-    fontWeight: '600',
+    fontSize: '18px',
+    fontWeight: '700',
     marginBottom: '20px',
-    color: '#333',
+    color: cores.texto,
   },
   formGroup: {
     marginBottom: '18px',
@@ -242,77 +259,76 @@ const styles = {
   label: {
     display: 'block',
     marginBottom: '6px',
-    fontWeight: '500',
-    color: '#333',
-    fontSize: '14px',
+    fontWeight: '600',
+    color: cores.texto,
+    fontSize: '13px',
   },
   input: {
     width: '100%',
     padding: '12px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '16px',
+    border: '1px solid ' + cores.borda,
+    borderRadius: '8px',
+    fontSize: '15px',
     boxSizing: 'border-box',
     fontFamily: 'inherit',
+    color: cores.texto,
   },
   senhaContainer: {
     position: 'relative',
   },
   olhoButton: {
     position: 'absolute',
-    right: '10px',
+    right: '8px',
     top: '50%',
     transform: 'translateY(-50%)',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    fontSize: '18px',
-    padding: '5px',
+    fontSize: '12px',
+    fontWeight: '600',
+    color: cores.teal,
+    padding: '5px 6px',
+    fontFamily: 'inherit',
   },
   validacaoTexto: {
     fontSize: '12px',
     marginTop: '5px',
     marginBottom: 0,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   erroBox: {
-    backgroundColor: '#fee',
-    border: '1px solid #fcc',
-    color: '#c00',
-    padding: '12px',
-    borderRadius: '6px',
+    backgroundColor: cores.perigoFundo,
+    border: '1px solid ' + cores.perigo + '33',
+    color: cores.perigoTexto,
+    padding: '12px 14px',
+    borderRadius: '8px',
     marginBottom: '20px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    fontSize: '14px',
-  },
-  erroIcon: {
-    fontSize: '18px',
+    fontSize: '13.5px',
   },
   botao: {
     width: '100%',
     padding: '14px',
-    backgroundColor: '#28a745',
-    color: 'white',
+    backgroundColor: cores.teal,
+    color: cores.branco,
     border: 'none',
-    borderRadius: '6px',
-    fontSize: '16px',
-    fontWeight: '600',
+    borderRadius: '8px',
+    fontSize: '15px',
+    fontWeight: '700',
     cursor: 'pointer',
-    marginTop: '10px',
+    fontFamily: 'inherit',
+    marginTop: '4px',
   },
   footer: {
     textAlign: 'center',
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    borderTop: '1px solid #eee',
-    fontSize: '14px',
-    color: '#666',
+    padding: '18px',
+    backgroundColor: cores.fundoPagina,
+    borderTop: '1px solid ' + cores.borda,
+    fontSize: '13.5px',
+    color: cores.textoSecundario,
   },
   link: {
-    color: '#28a745',
+    color: cores.teal,
     textDecoration: 'none',
-    fontWeight: '600',
+    fontWeight: '700',
   },
 };

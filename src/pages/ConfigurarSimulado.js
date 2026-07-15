@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { buscarTodasQuestoes, embaralharArray } from '../services/questoesService';
+import Layout from '../components/Layout';
+import { cores, estilosBase } from '../styles/theme';
 
 export default function ConfigurarSimulado() {
   const [todasQuestoesCache, setTodasQuestoesCache] = useState([]);
@@ -117,25 +119,25 @@ export default function ConfigurarSimulado() {
 
   if (carregando) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="550px">
         <div style={styles.loadingBox}>Carregando...</div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div style={styles.container}>
+    <Layout maxWidth="550px">
       <div style={styles.card}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-  <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
-    Voltar
-  </button>
-  <Link to="/historico-simulados" style={styles.btnVoltar}>
-    Ver Historico
-  </Link>
-</div>
+        <div style={styles.topoLinha}>
+          <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
+            Voltar
+          </button>
+          <Link to="/historico-simulados" style={styles.btnVoltar}>
+            Ver Historico
+          </Link>
+        </div>
 
-<h2 style={styles.titulo}>Configurar Simulado</h2>
+        <h2 style={styles.titulo}>Configurar Simulado</h2>
         {erro && <div style={styles.erroBox}>{erro}</div>}
 
         <div style={styles.formGroup}>
@@ -234,67 +236,46 @@ export default function ConfigurarSimulado() {
           Iniciar Simulado
         </button>
       </div>
-    </div>
+    </Layout>
   );
 }
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingTop: '30px',
-  },
   card: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    maxWidth: '550px',
-    width: '100%',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    ...estilosBase.card,
+    padding: '28px',
   },
-  btnVoltar: {
-    padding: '8px 16px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
+  topoLinha: {
+    display: 'flex',
+    justifyContent: 'space-between',
     marginBottom: '15px',
   },
+  btnVoltar: estilosBase.botaoSecundario,
   titulo: {
-    fontSize: '22px',
+    fontSize: '20px',
     marginBottom: '20px',
-    color: '#333',
+    color: cores.texto,
+    fontWeight: '700',
   },
   formGroup: {
     marginBottom: '20px',
   },
-  label: {
-    display: 'block',
-    marginBottom: '8px',
-    fontWeight: '500',
-    color: '#333',
-    fontSize: '14px',
-  },
+  label: estilosBase.label,
   checkboxItemGrande: {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: '600',
     cursor: 'pointer',
+    color: cores.texto,
   },
   checkboxLista: {
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
+    border: '1px solid ' + cores.borda,
+    borderRadius: '8px',
     padding: '12px',
     maxHeight: '180px',
     overflowY: 'auto',
@@ -302,8 +283,8 @@ const styles = {
   checkboxLinhaHorizontal: {
     display: 'flex',
     gap: '20px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
+    border: '1px solid ' + cores.borda,
+    borderRadius: '8px',
     padding: '12px',
   },
   checkboxItem: {
@@ -312,44 +293,21 @@ const styles = {
     gap: '8px',
     fontSize: '14px',
     cursor: 'pointer',
+    color: cores.texto,
   },
-  input: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '15px',
-    boxSizing: 'border-box',
-  },
+  input: estilosBase.input,
   infoTexto: {
     fontSize: '12px',
-    color: '#666',
+    color: cores.textoSecundario,
     marginTop: '5px',
   },
   botaoIniciar: {
+    ...estilosBase.botaoPrimario,
     width: '100%',
     padding: '15px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
+    fontSize: '15px',
     marginTop: '10px',
   },
-  erroBox: {
-    backgroundColor: '#fee',
-    border: '1px solid #fcc',
-    color: '#c00',
-    padding: '12px',
-    borderRadius: '6px',
-    marginBottom: '20px',
-    fontSize: '14px',
-  },
-  loadingBox: {
-    textAlign: 'center',
-    padding: '50px',
-    fontSize: '18px',
-  },
+  erroBox: estilosBase.erroBox,
+  loadingBox: estilosBase.loadingBox,
 };

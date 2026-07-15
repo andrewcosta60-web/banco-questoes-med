@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
+import { cores } from '../styles/theme';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
-  
+
   const { login, carregando, erro, setErro, usuario } = useAuth();
   const navigate = useNavigate();
 
@@ -47,7 +48,10 @@ export default function Login() {
       <div style={styles.card}>
         {/* HEADER */}
         <div style={styles.header}>
-          <h1 style={styles.titulo}>🏥 Banco de Questões</h1>
+          <div style={styles.marca}>
+            <div style={styles.marcaPonto} />
+            <h1 style={styles.titulo}>Banco de Questões</h1>
+          </div>
           <p style={styles.subtitulo}>Sistema de Estudo para Residência Médica</p>
         </div>
 
@@ -58,14 +62,13 @@ export default function Login() {
           {/* MENSAGEM DE ERRO */}
           {erro && (
             <div style={styles.erroBox}>
-              <span style={styles.erroIcon}>⚠️</span>
               <span>{erro}</span>
             </div>
           )}
 
           {/* CAMPO EMAIL */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>Email:</label>
+            <label style={styles.label}>Email</label>
             <input
               type="email"
               value={email}
@@ -78,7 +81,7 @@ export default function Login() {
 
           {/* CAMPO SENHA */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>Senha:</label>
+            <label style={styles.label}>Senha</label>
             <div style={styles.senhaContainer}>
               <input
                 type={mostrarSenha ? 'text' : 'password'}
@@ -94,7 +97,7 @@ export default function Login() {
                 style={styles.olhoButton}
                 disabled={carregando}
               >
-                {mostrarSenha ? '👁️' : '👁️‍🗨️'}
+                {mostrarSenha ? 'Ocultar' : 'Ver'}
               </button>
             </div>
           </div>
@@ -109,7 +112,7 @@ export default function Login() {
             }}
             disabled={carregando}
           >
-            {carregando ? '⏳ Entrando...' : '✓ Fazer Login'}
+            {carregando ? 'Entrando...' : 'Fazer Login'}
           </button>
         </form>
 
@@ -134,70 +137,86 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: cores.fundoPagina,
     padding: '20px',
   },
 
   card: {
-    backgroundColor: 'white',
+    backgroundColor: cores.branco,
+    border: '1px solid ' + cores.borda,
     borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    maxWidth: '450px',
+    maxWidth: '440px',
     width: '100%',
     overflow: 'hidden',
   },
 
   header: {
-    backgroundColor: '#007bff',
-    color: 'white',
-    padding: '30px 20px',
+    backgroundColor: cores.navy,
+    color: cores.branco,
+    padding: '30px 24px',
     textAlign: 'center',
   },
 
+  marca: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    marginBottom: '8px',
+  },
+
+  marcaPonto: {
+    width: '9px',
+    height: '9px',
+    borderRadius: '50%',
+    backgroundColor: cores.teal,
+    flexShrink: 0,
+  },
+
   titulo: {
-    margin: '0 0 10px 0',
-    fontSize: '28px',
-    fontWeight: 'bold',
+    margin: 0,
+    fontSize: '22px',
+    fontWeight: '700',
   },
 
   subtitulo: {
-    margin: '0',
-    fontSize: '14px',
-    opacity: 0.9,
+    margin: 0,
+    fontSize: '13.5px',
+    color: cores.textoClaro,
   },
 
   form: {
-    padding: '30px 20px',
+    padding: '28px 24px',
   },
 
   formTitulo: {
-    fontSize: '22px',
-    fontWeight: '600',
+    fontSize: '18px',
+    fontWeight: '700',
     marginBottom: '20px',
-    color: '#333',
+    color: cores.texto,
   },
 
   formGroup: {
-    marginBottom: '20px',
+    marginBottom: '18px',
   },
 
   label: {
     display: 'block',
-    marginBottom: '8px',
-    fontWeight: '500',
-    color: '#333',
-    fontSize: '14px',
+    marginBottom: '6px',
+    fontWeight: '600',
+    color: cores.texto,
+    fontSize: '13px',
   },
 
   input: {
     width: '100%',
     padding: '12px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '16px',
+    border: '1px solid ' + cores.borda,
+    borderRadius: '8px',
+    fontSize: '15px',
     boxSizing: 'border-box',
     fontFamily: 'inherit',
-    transition: 'border-color 0.3s',
+    color: cores.texto,
   },
 
   senhaContainer: {
@@ -207,59 +226,55 @@ const styles = {
 
   olhoButton: {
     position: 'absolute',
-    right: '10px',
+    right: '8px',
     top: '50%',
     transform: 'translateY(-50%)',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    fontSize: '18px',
-    padding: '5px',
+    fontSize: '12px',
+    fontWeight: '600',
+    color: cores.teal,
+    padding: '5px 6px',
+    fontFamily: 'inherit',
   },
 
   erroBox: {
-    backgroundColor: '#fee',
-    border: '1px solid #fcc',
-    color: '#c00',
-    padding: '12px',
-    borderRadius: '6px',
+    backgroundColor: cores.perigoFundo,
+    border: '1px solid ' + cores.perigo + '33',
+    color: cores.perigoTexto,
+    padding: '12px 14px',
+    borderRadius: '8px',
     marginBottom: '20px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    fontSize: '14px',
-  },
-
-  erroIcon: {
-    fontSize: '18px',
+    fontSize: '13.5px',
   },
 
   botao: {
     width: '100%',
     padding: '14px',
-    backgroundColor: '#007bff',
-    color: 'white',
+    backgroundColor: cores.teal,
+    color: cores.branco,
     border: 'none',
-    borderRadius: '6px',
-    fontSize: '16px',
-    fontWeight: '600',
+    borderRadius: '8px',
+    fontSize: '15px',
+    fontWeight: '700',
     cursor: 'pointer',
-    transition: 'background-color 0.3s',
+    fontFamily: 'inherit',
   },
 
   footer: {
     textAlign: 'center',
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    borderTop: '1px solid #eee',
-    fontSize: '14px',
-    color: '#666',
+    padding: '18px',
+    backgroundColor: cores.fundoPagina,
+    borderTop: '1px solid ' + cores.borda,
+    fontSize: '13.5px',
+    color: cores.textoSecundario,
   },
 
   link: {
-    color: '#007bff',
+    color: cores.teal,
     textDecoration: 'none',
-    fontWeight: '600',
+    fontWeight: '700',
     cursor: 'pointer',
   },
 };

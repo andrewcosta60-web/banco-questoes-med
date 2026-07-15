@@ -1,28 +1,27 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { auth, db } from './firebaseConfig';
-import { 
-  signInWithEmailAndPassword, 
+import {
+  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
 } from 'firebase/auth';
-import { setDoc, doc, getDoc } from 'firebase/firestore';
+import { setDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 
-// Cria o contexto
 export const AuthContext = createContext();
 
-// Componente provider que envolve todo o app
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
-  // Monitora se o usuário tá logado (roda uma vez quando o app carrega)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         if (user) {
-          // Usuário tá logado - busca dados dele no Firestore
           const docRef = doc(db, 'usuarios', user.uid);
           const docSnap = await getDoc(docRef);
 
@@ -30,21 +29,19 @@ export function AuthProvider({ children }) {
             setUsuario({
               uid: user.uid,
               email: user.email,
-              ...docSnap.data(), // Pega nome, dataCadastro, role, etc
+              ...docSnap.data(),
             });
           } else {
-            // Se não tiver dados no Firestore, cria perfil mínimo
             setUsuario({
               uid: user.uid,
               email: user.email,
             });
           }
         } else {
-          // Usuário tá deslogado
           setUsuario(null);
         }
       } catch (error) {
-        console.error('Erro ao carregar usuário:', error);
+        console.error('Erro ao carregar usuario:', error);
         setErro(error.message);
       } finally {
         setCarregando(false);
@@ -54,14 +51,12 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
-  // Função de REGISTRO
-  const signup = async (nome, email, senha) => {
+  const signup = async (nome, email, senha, apelido = '') => {
     setErro('');
 
     try {
       setCarregando(true);
 
-      // Valida dados
       if (!nome || !email || !senha) {
         throw new Error('Preencha todos os campos');
       }
@@ -70,13 +65,12 @@ export function AuthProvider({ children }) {
         throw new Error('Senha deve ter pelo menos 6 caracteres');
       }
 
-      // Cria usuário no Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
       const user = userCredential.user;
 
-      // Salva dados complementares no Firestore
       await setDoc(doc(db, 'usuarios', user.uid), {
         nome: nome,
+        apelido: apelido || '',
         email: email,
         dataCadastro: new Date().toISOString(),
         role: 'student',
@@ -86,6 +80,7 @@ export function AuthProvider({ children }) {
         uid: user.uid,
         email: email,
         nome: nome,
+        apelido: apelido || '',
         dataCadastro: new Date().toISOString(),
         role: 'student',
       });
@@ -99,23 +94,19 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Função de LOGIN
   const login = async (email, senha) => {
     setErro('');
 
     try {
       setCarregando(true);
 
-      // Valida dados
       if (!email || !senha) {
         throw new Error('Preencha email e senha');
       }
 
-      // Faz login no Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, senha);
       const user = userCredential.user;
 
-      // Busca dados no Firestore
       const docRef = doc(db, 'usuarios', user.uid);
       const docSnap = await getDoc(docRef);
 
@@ -141,7 +132,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Função de LOGOUT
   const logout = async () => {
     setErro('');
 
@@ -158,7 +148,46 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Objeto que será compartilhado com todo o app
+  // Atualiza nome e/ou apelido do usuario logado
+  const atualizarPerfil = async (dadosAtualizados) => {
+    setErro('');
+
+    try {
+      const docRef = doc(db, 'usuarios', usuario.uid);
+      await updateDoc(docRef, dadosAtualizados);
+      setUsuario((prev) => ({ ...prev, ...dadosAtualizados }));
+      return true;
+    } catch (error) {
+      setErro(error.message);
+      return false;
+    }
+  };
+
+  // Troca a senha do usuario logado (exige a senha atual por seguranca)
+  const trocarSenha = async (senhaAtual, senhaNova) => {
+    setErro('');
+
+    try {
+      if (senhaNova.length < 6) {
+        throw new Error('A nova senha deve ter pelo menos 6 caracteres');
+      }
+
+      const user = auth.currentUser;
+      const credential = EmailAuthProvider.credential(user.email, senhaAtual);
+      await reauthenticateWithCredential(user, credential);
+      await updatePassword(user, senhaNova);
+
+      return true;
+    } catch (error) {
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        setErro('Senha atual incorreta');
+      } else {
+        setErro(error.message);
+      }
+      return false;
+    }
+  };
+
   const value = {
     usuario,
     carregando,
@@ -167,16 +196,13 @@ export function AuthProvider({ children }) {
     login,
     signup,
     logout,
+    atualizarPerfil,
+    trocarSenha,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Hook customizado para usar o contexto facilmente
 export function useAuth() {
   const context = React.useContext(AuthContext);
   if (!context) {

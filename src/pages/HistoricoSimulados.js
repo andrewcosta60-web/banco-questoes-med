@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 import { buscarHistoricoSimulados } from '../services/simuladosService';
+import Layout from '../components/Layout';
+import { cores, estilosBase } from '../styles/theme';
 
 export default function HistoricoSimulados() {
   const [simulados, setSimulados] = useState([]);
@@ -48,14 +50,14 @@ export default function HistoricoSimulados() {
 
   if (carregando) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="700px">
         <div style={styles.loadingBox}>Carregando historico...</div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div style={styles.container}>
+    <Layout maxWidth="700px">
       <div style={styles.header}>
         <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
           Voltar
@@ -91,8 +93,8 @@ export default function HistoricoSimulados() {
                   <span
                     style={{
                       ...styles.pctBadge,
-                      backgroundColor: pct >= 60 ? '#d4edda' : '#f8d7da',
-                      color: pct >= 60 ? '#155724' : '#721c24',
+                      backgroundColor: pct >= 60 ? cores.tealFundo : cores.perigoFundo,
+                      color: pct >= 60 ? cores.sucessoTexto : cores.perigoTexto,
                     }}
                   >
                     {pct}%
@@ -147,48 +149,32 @@ export default function HistoricoSimulados() {
           );
         })}
       </div>
-    </div>
+    </Layout>
   );
 }
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  },
   header: {
-    maxWidth: '700px',
-    margin: '0 auto 20px auto',
     display: 'flex',
     alignItems: 'center',
     gap: '15px',
+    marginBottom: '20px',
   },
-  btnVoltar: {
-    padding: '8px 16px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-  },
+  btnVoltar: estilosBase.botaoSecundario,
   titulo: {
-    fontSize: '18px',
-    color: '#333',
+    fontSize: '20px',
+    color: cores.texto,
+    fontWeight: '700',
     margin: 0,
   },
   lista: {
-    maxWidth: '700px',
-    margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
   },
   card: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    ...estilosBase.card,
+    padding: 0,
     overflow: 'hidden',
   },
   cardHeader: {
@@ -200,12 +186,12 @@ const styles = {
   },
   cardData: {
     fontSize: '13px',
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: '700',
+    color: cores.texto,
   },
   cardAreas: {
     fontSize: '12px',
-    color: '#666',
+    color: cores.textoSecundario,
     marginTop: '3px',
   },
   cardResumo: {
@@ -221,15 +207,15 @@ const styles = {
   },
   cardDetalheTexto: {
     fontSize: '12px',
-    color: '#666',
+    color: cores.textoSecundario,
   },
   cardSeta: {
     fontSize: '11px',
-    color: '#999',
+    color: cores.textoSecundario,
   },
   cardExpandido: {
     padding: '0 15px 15px 15px',
-    borderTop: '1px solid #eee',
+    borderTop: '1px solid ' + cores.borda,
   },
   gridResumoMini: {
     display: 'grid',
@@ -241,54 +227,35 @@ const styles = {
   resumoMiniItem: {
     textAlign: 'center',
     padding: '10px 5px',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '6px',
+    backgroundColor: cores.fundoPagina,
+    borderRadius: '8px',
   },
   resumoMiniValor: {
     fontSize: '16px',
     fontWeight: '700',
-    color: '#333',
+    color: cores.texto,
   },
   resumoMiniLabel: {
     fontSize: '10px',
-    color: '#666',
+    color: cores.textoSecundario,
     marginTop: '3px',
   },
   listaAreasMini: {
     fontSize: '12px',
   },
   subtituloMini: {
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: '700',
+    color: cores.texto,
     marginBottom: '6px',
   },
   itemAreaMini: {
     display: 'flex',
     justifyContent: 'space-between',
     padding: '5px 0',
-    borderBottom: '1px solid #f0f0f0',
-    color: '#555',
+    borderBottom: '1px solid ' + cores.borda,
+    color: cores.textoTerciario,
   },
-  vazioBox: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    textAlign: 'center',
-    color: '#666',
-  },
-  erroBox: {
-    maxWidth: '700px',
-    margin: '0 auto 20px auto',
-    backgroundColor: '#fee',
-    border: '1px solid #fcc',
-    color: '#c00',
-    padding: '12px',
-    borderRadius: '6px',
-    fontSize: '14px',
-  },
-  loadingBox: {
-    textAlign: 'center',
-    padding: '50px',
-    fontSize: '18px',
-  },
+  vazioBox: estilosBase.vazioBox,
+  erroBox: estilosBase.erroBox,
+  loadingBox: estilosBase.loadingBox,
 };

@@ -64,3 +64,64 @@ export function calcularEstatisticas(respostas) {
     recentes,
   };
 }
+// Gera os ultimos N dias (incluindo hoje) no formato YYYY-MM-DD
+function gerarUltimosDias(quantidade) {
+  const dias = [];
+  for (let i = quantidade - 1; i >= 0; i--) {
+    const data = new Date();
+    data.setDate(data.getDate() - i);
+    dias.push(data.toISOString().split('T')[0]);
+  }
+  return dias;
+}
+
+// Monta o calendario de atividade dos ultimos N dias (padrao 35, ~5 semanas)
+export function montarCalendarioAtividade(respostas, metaDiaria = 10, dias = 35) {
+  const ultimosDias = gerarUltimosDias(dias);
+
+  // Conta quantas respostas existem em cada dia
+  const contagemPorDia = {};
+  respostas.forEach((r) => {
+    if (!r.dataCriacao) return;
+    const dia = r.dataCriacao.split('T')[0];
+    contagemPorDia[dia] = (contagemPorDia[dia] || 0) + 1;
+  });
+
+  return ultimosDias.map((dia) => {
+    const feitas = contagemPorDia[dia] || 0;
+    let status = 'vazio'; // sem nenhuma questao
+    if (feitas > 0 && feitas < metaDiaria) status = 'parcial';
+    if (feitas >= metaDiaria) status = 'completo';
+
+    return { dia, feitas, status };
+  });
+}
+
+// Calcula a sequencia atual de dias consecutivos com pelo menos 1 questao respondida
+export function calcularSequenciaAtual(respostas) {
+  const diasComAtividade = new Set(
+    respostas.filter((r) => r.dataCriacao).map((r) => r.dataCriacao.split('T')[0])
+  );
+
+  let sequencia = 0;
+  let dataAtual = new Date();
+
+  // Se hoje ainda nao tem atividade, comeca a contar a partir de ontem
+  // (para nao zerar a sequencia so porque o dia ainda nao acabou)
+  const hojeStr = dataAtual.toISOString().split('T')[0];
+  if (!diasComAtividade.has(hojeStr)) {
+    dataAtual.setDate(dataAtual.getDate() - 1);
+  }
+
+  while (true) {
+    const diaStr = dataAtual.toISOString().split('T')[0];
+    if (diasComAtividade.has(diaStr)) {
+      sequencia++;
+      dataAtual.setDate(dataAtual.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return sequencia;
+}

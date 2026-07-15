@@ -6,6 +6,8 @@ import {
   validarQuestao,
   salvarQuestoesEmLote,
 } from '../services/importacaoService';
+import Layout from '../components/Layout';
+import { cores, estilosBase } from '../styles/theme';
 
 export default function ImportarQuestoes() {
   const [etapa, setEtapa] = useState('upload'); // upload, preview, salvando, concluido
@@ -95,7 +97,7 @@ export default function ImportarQuestoes() {
   // ===================== TELA 1: UPLOAD =====================
   if (etapa === 'upload') {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="500px">
         <div style={styles.card}>
           <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
             Voltar
@@ -133,7 +135,7 @@ export default function ImportarQuestoes() {
             {carregando ? 'Analisando...' : 'Analisar Questoes'}
           </button>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -144,14 +146,14 @@ export default function ImportarQuestoes() {
 
     if (!questaoAtual) {
       return (
-        <div style={styles.container}>
+        <Layout maxWidth="500px">
           <div style={styles.card}>
             <p>Nenhuma questao restante. Todas foram deletadas.</p>
             <button onClick={() => setEtapa('upload')} style={styles.botao}>
               Voltar ao Upload
             </button>
           </div>
-        </div>
+        </Layout>
       );
     }
 
@@ -160,7 +162,7 @@ export default function ImportarQuestoes() {
     const imagemFaltando = questaoAtual.imagemNome && !imagensZip[questaoAtual.imagemNome];
 
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="700px">
         <div style={styles.cardGrande}>
           <div style={styles.previewHeader}>
             <button onClick={() => setEtapa('upload')} style={styles.btnVoltar}>
@@ -174,7 +176,7 @@ export default function ImportarQuestoes() {
           {problemas.length > 0 && (
             <div style={styles.erroBox}>
               <strong>Problemas encontrados:</strong>
-              <ul style={{ margin: '5px 0 0 0', paddingLeft: '20px' }}>
+              <ul style={styles.listaProblemas}>
                 {problemas.map((p, i) => (
                   <li key={i}>{p}</li>
                 ))}
@@ -189,7 +191,7 @@ export default function ImportarQuestoes() {
           )}
 
           {temImagem && (
-            <div style={styles.avisoBoxOk}>
+            <div style={styles.sucessoBox}>
               Imagem "{questaoAtual.imagemNome}" encontrada.
             </div>
           )}
@@ -273,7 +275,7 @@ export default function ImportarQuestoes() {
           </div>
 
           <div style={styles.footerPreview}>
-            <p style={{ fontSize: '13px', color: '#666' }}>
+            <p style={styles.footerTexto}>
               Total de questoes prontas para importar: {questoes.length}
             </p>
             <button onClick={handleConfirmarImportacao} style={styles.btnConfirmarFinal}>
@@ -281,7 +283,7 @@ export default function ImportarQuestoes() {
             </button>
           </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -290,34 +292,34 @@ export default function ImportarQuestoes() {
     const pct = progresso.total > 0 ? Math.round((progresso.atual / progresso.total) * 100) : 0;
 
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="500px">
         <div style={styles.card}>
           <h2 style={styles.titulo}>Importando questoes...</h2>
           <div style={styles.progressoBarraFundo}>
             <div style={{ ...styles.progressoBarraPreenchida, width: pct + '%' }} />
           </div>
-          <p style={{ textAlign: 'center', marginTop: '10px' }}>
+          <p style={styles.progressoTexto}>
             {progresso.atual} de {progresso.total} ({pct}%)
           </p>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   // ===================== TELA 4: CONCLUIDO =====================
   if (etapa === 'concluido') {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="500px">
         <div style={styles.card}>
           <h2 style={styles.titulo}>Importacao Concluida!</h2>
-          <p style={{ color: '#28a745', fontWeight: '600' }}>
+          <p style={styles.mensagemSucesso}>
             {resultadoFinal.sucesso} questoes importadas com sucesso.
           </p>
 
           {resultadoFinal.falhas.length > 0 && (
             <div style={styles.erroBox}>
               <strong>{resultadoFinal.falhas.length} falharam:</strong>
-              <ul style={{ margin: '5px 0 0 0', paddingLeft: '20px' }}>
+              <ul style={styles.listaProblemas}>
                 {resultadoFinal.falhas.map((f, i) => (
                   <li key={i}>
                     Linha {f.linha}: {f.erro}
@@ -331,7 +333,7 @@ export default function ImportarQuestoes() {
             Voltar ao Dashboard
           </button>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -339,132 +341,58 @@ export default function ImportarQuestoes() {
 }
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingTop: '30px',
-  },
   card: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    maxWidth: '500px',
-    width: '100%',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    ...estilosBase.card,
+    padding: '28px',
   },
   cardGrande: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    maxWidth: '700px',
-    width: '100%',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    ...estilosBase.card,
+    padding: '28px',
   },
-  btnVoltar: {
-    padding: '8px 16px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-  },
+  btnVoltar: estilosBase.botaoSecundario,
   titulo: {
-    fontSize: '22px',
+    fontSize: '20px',
     marginBottom: '20px',
-    color: '#333',
+    color: cores.texto,
+    fontWeight: '700',
   },
   formGroup: {
     marginBottom: '15px',
   },
-  label: {
-    display: 'block',
-    marginBottom: '6px',
-    fontWeight: '500',
-    color: '#333',
-    fontSize: '14px',
-  },
-  labelPequeno: {
-    display: 'block',
-    marginBottom: '4px',
-    fontWeight: '500',
-    color: '#666',
-    fontSize: '12px',
-  },
+  label: estilosBase.label,
+  labelPequeno: estilosBase.labelPequeno,
   inputFile: {
     width: '100%',
     padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
+    border: '1px solid ' + cores.borda,
+    borderRadius: '8px',
     fontSize: '14px',
     boxSizing: 'border-box',
   },
-  input: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '14px',
-    boxSizing: 'border-box',
-    fontFamily: 'inherit',
-  },
+  input: estilosBase.input,
   inputGabarito: {
-    borderColor: '#28a745',
-    backgroundColor: '#f0fff4',
+    borderColor: cores.teal,
+    backgroundColor: cores.tealFundo,
   },
   textarea: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    fontSize: '14px',
-    boxSizing: 'border-box',
-    fontFamily: 'inherit',
+    ...estilosBase.input,
     resize: 'vertical',
   },
   botao: {
+    ...estilosBase.botaoPrimario,
     width: '100%',
-    padding: '14px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
     marginTop: '10px',
   },
   erroBox: {
-    backgroundColor: '#fee',
-    border: '1px solid #fcc',
-    color: '#c00',
-    padding: '12px',
-    borderRadius: '6px',
+    ...estilosBase.erroBox,
     marginBottom: '15px',
-    fontSize: '13px',
   },
-  avisoBox: {
-    backgroundColor: '#fff3cd',
-    border: '1px solid #ffc107',
-    color: '#856404',
-    padding: '10px',
-    borderRadius: '6px',
-    marginBottom: '15px',
-    fontSize: '13px',
+  listaProblemas: {
+    margin: '5px 0 0 0',
+    paddingLeft: '20px',
   },
-  avisoBoxOk: {
-    backgroundColor: '#d4edda',
-    border: '1px solid #28a745',
-    color: '#155724',
-    padding: '10px',
-    borderRadius: '6px',
-    marginBottom: '15px',
-    fontSize: '13px',
-  },
+  avisoBox: estilosBase.avisoBox,
+  sucessoBox: estilosBase.sucessoBox,
   previewHeader: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -473,8 +401,8 @@ const styles = {
   },
   previewContador: {
     fontSize: '13px',
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: '700',
+    color: cores.texto,
   },
   tags: {
     display: 'flex',
@@ -482,75 +410,60 @@ const styles = {
     marginBottom: '15px',
     flexWrap: 'wrap',
   },
-  tag: {
-    padding: '4px 10px',
-    backgroundColor: '#e7f3ff',
-    color: '#007bff',
-    borderRadius: '15px',
-    fontSize: '11px',
-    fontWeight: '600',
-  },
+  tag: estilosBase.tag,
   botoesAcao: {
     display: 'flex',
     gap: '10px',
     marginTop: '20px',
   },
-  btnNav: {
-    padding: '10px 16px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-  },
+  btnNav: estilosBase.botaoSecundario,
   btnDeletar: {
+    ...estilosBase.botaoPerigo,
     padding: '10px 16px',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
     fontSize: '13px',
   },
   btnOk: {
+    ...estilosBase.botaoPrimario,
     flex: 1,
     padding: '10px 16px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
     fontSize: '13px',
-    fontWeight: '600',
   },
   footerPreview: {
     marginTop: '25px',
     paddingTop: '20px',
-    borderTop: '1px solid #eee',
+    borderTop: '1px solid ' + cores.borda,
     textAlign: 'center',
   },
+  footerTexto: {
+    fontSize: '13px',
+    color: cores.textoSecundario,
+  },
   btnConfirmarFinal: {
+    ...estilosBase.botaoPrimario,
     width: '100%',
     padding: '15px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
+    fontSize: '15px',
   },
   progressoBarraFundo: {
     width: '100%',
     height: '20px',
-    backgroundColor: '#e9ecef',
+    backgroundColor: cores.fundoPagina,
     borderRadius: '10px',
     overflow: 'hidden',
   },
   progressoBarraPreenchida: {
     height: '100%',
-    backgroundColor: '#28a745',
+    backgroundColor: cores.teal,
     transition: 'width 0.3s',
+  },
+  progressoTexto: {
+    textAlign: 'center',
+    marginTop: '10px',
+    color: cores.textoSecundario,
+    fontSize: '13px',
+  },
+  mensagemSucesso: {
+    color: cores.sucessoTexto,
+    fontWeight: '600',
   },
 };

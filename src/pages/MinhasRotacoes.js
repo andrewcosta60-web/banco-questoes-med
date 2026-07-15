@@ -8,6 +8,8 @@ import {
   questoesFeitasHoje,
   cancelarRotacao,
 } from '../services/rotacoesService';
+import Layout from '../components/Layout';
+import { cores, estilosBase } from '../styles/theme';
 
 export default function MinhasRotacoes() {
   const [rotacoes, setRotacoes] = useState([]);
@@ -51,14 +53,14 @@ export default function MinhasRotacoes() {
 
   if (carregando) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="700px">
         <div style={styles.loadingBox}>Carregando...</div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div style={styles.container}>
+    <Layout maxWidth="700px">
       <div style={styles.header}>
         <button onClick={() => navigate('/dashboard')} style={styles.btnVoltar}>
           Voltar
@@ -131,49 +133,32 @@ export default function MinhasRotacoes() {
       <Link to="/criar-rotacao" style={styles.btnNovaRotacao}>
         + Criar Nova Rotacao
       </Link>
-    </div>
+    </Layout>
   );
 }
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  },
   header: {
-    maxWidth: '700px',
-    margin: '0 auto 20px auto',
     display: 'flex',
     alignItems: 'center',
     gap: '15px',
+    marginBottom: '20px',
   },
-  btnVoltar: {
-    padding: '8px 16px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px',
-  },
+  btnVoltar: estilosBase.botaoSecundario,
   titulo: {
-    fontSize: '22px',
-    color: '#333',
+    fontSize: '20px',
+    color: cores.texto,
+    fontWeight: '700',
     margin: 0,
   },
   lista: {
-    maxWidth: '700px',
-    margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
     gap: '15px',
   },
   card: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
+    ...estilosBase.card,
     padding: '20px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
   },
   cardHeader: {
     display: 'flex',
@@ -183,20 +168,14 @@ const styles = {
   },
   cardTitulo: {
     margin: 0,
-    fontSize: '18px',
-    color: '#333',
+    fontSize: '17px',
+    color: cores.texto,
+    fontWeight: '700',
   },
-  badge: {
-    padding: '4px 10px',
-    backgroundColor: '#e7f3ff',
-    color: '#007bff',
-    borderRadius: '20px',
-    fontSize: '11px',
-    fontWeight: '600',
-  },
+  badge: estilosBase.tag,
   cardInfo: {
     fontSize: '13px',
-    color: '#666',
+    color: cores.textoSecundario,
     margin: '4px 0',
   },
   progressoContainer: {
@@ -206,18 +185,18 @@ const styles = {
   progressoBarraFundo: {
     width: '100%',
     height: '10px',
-    backgroundColor: '#e9ecef',
+    backgroundColor: cores.fundoPagina,
     borderRadius: '5px',
     overflow: 'hidden',
   },
   progressoBarraPreenchida: {
     height: '100%',
-    backgroundColor: '#28a745',
+    backgroundColor: cores.teal,
     transition: 'width 0.3s',
   },
   progressoTexto: {
     fontSize: '12px',
-    color: '#666',
+    color: cores.textoSecundario,
     marginTop: '5px',
     display: 'block',
   },
@@ -229,55 +208,36 @@ const styles = {
     flex: 1,
     textAlign: 'center',
     padding: '10px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    borderRadius: '6px',
+    backgroundColor: cores.teal,
+    color: cores.branco,
+    borderRadius: '8px',
     textDecoration: 'none',
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: '14px',
   },
   btnRemover: {
     padding: '10px 16px',
-    backgroundColor: '#dc3545',
-    color: 'white',
+    backgroundColor: cores.perigoFundo,
+    color: cores.perigoTexto,
     border: 'none',
-    borderRadius: '6px',
-    fontWeight: '600',
+    borderRadius: '8px',
+    fontWeight: '700',
     fontSize: '14px',
     cursor: 'pointer',
+    fontFamily: 'inherit',
   },
-  vazioBox: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    textAlign: 'center',
-    color: '#666',
-  },
+  vazioBox: estilosBase.vazioBox,
   btnNovaRotacao: {
     display: 'block',
-    maxWidth: '700px',
-    margin: '20px auto 0 auto',
+    marginTop: '20px',
     textAlign: 'center',
     padding: '14px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    borderRadius: '6px',
+    backgroundColor: cores.teal,
+    color: cores.branco,
+    borderRadius: '8px',
     textDecoration: 'none',
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  erroBox: {
-    maxWidth: '700px',
-    margin: '0 auto 20px auto',
-    backgroundColor: '#fee',
-    border: '1px solid #fcc',
-    color: '#c00',
-    padding: '12px',
-    borderRadius: '6px',
-    fontSize: '14px',
-  },
-  loadingBox: {
-    textAlign: 'center',
-    padding: '50px',
-    fontSize: '18px',
-  },
+  erroBox: estilosBase.erroBox,
+  loadingBox: estilosBase.loadingBox,
 };

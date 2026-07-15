@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 import { salvarSimulado } from '../services/simuladosService';
+import Layout from '../components/Layout';
+import { cores, estilosBase } from '../styles/theme';
 
 export default function Simulado() {
   const location = useLocation();
@@ -202,7 +204,7 @@ detalhes.forEach((d) => {
     ];
 
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="800px">
         <div style={styles.header}>
           <div style={styles.progresso}>
             Questao {indiceAtual + 1} de {questoes.length}
@@ -266,18 +268,18 @@ detalhes.forEach((d) => {
             </button>
           </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   // ===================== TELA DE RESULTADO =====================
   if (etapa === 'resultado' && resultadoFinal) {
     return (
-      <div style={styles.container}>
+      <Layout maxWidth="800px">
         <div style={styles.cardResultado}>
           <h2 style={styles.tituloResultado}>Resultado do Simulado</h2>
 
-          {salvando && <p style={{ fontSize: '12px', color: '#888' }}>Salvando historico...</p>}
+          {salvando && <p style={styles.textoSalvando}>Salvando historico...</p>}
 
           <div style={styles.gridResumo}>
             <div style={styles.resumoItem}>
@@ -293,13 +295,13 @@ detalhes.forEach((d) => {
               <div style={styles.resumoLabel}>Puladas</div>
             </div>
             <div style={styles.resumoItem}>
-              <div style={{ ...styles.resumoValor, color: '#28a745' }}>
+              <div style={{ ...styles.resumoValor, color: cores.teal }}>
                 {resultadoFinal.acertos}
               </div>
               <div style={styles.resumoLabel}>Acertos</div>
             </div>
             <div style={styles.resumoItem}>
-              <div style={{ ...styles.resumoValor, color: '#007bff' }}>
+              <div style={{ ...styles.resumoValor, color: cores.teal }}>
                 {resultadoFinal.percentualAcerto}%
               </div>
               <div style={styles.resumoLabel}>% Acerto</div>
@@ -317,7 +319,7 @@ detalhes.forEach((d) => {
     return (
       <div key={area} style={styles.itemArea}>
         <span>{area}</span>
-        <span style={{ ...styles.itemAreaValor, color: pct < 60 ? '#dc3545' : '#28a745' }}>
+        <span style={{ ...styles.itemAreaValor, color: pct < 60 ? cores.perigo : cores.teal }}>
           {dados.acertos} / {dados.total} ({pct}%)
         </span>
       </div>
@@ -341,7 +343,7 @@ detalhes.forEach((d) => {
             {dados.subarea || 'Sem subarea'}
             <span style={styles.itemSubareaArea}> ({dados.area})</span>
           </span>
-          <span style={{ ...styles.itemAreaValor, color: pct < 60 ? '#dc3545' : '#28a745' }}>
+          <span style={{ ...styles.itemAreaValor, color: pct < 60 ? cores.perigo : cores.teal }}>
             {dados.acertos} / {dados.total} ({pct}%)
           </span>
         </div>
@@ -376,8 +378,8 @@ detalhes.forEach((d) => {
                       <span
                         style={{
                           ...styles.tag,
-                          backgroundColor: d.correta ? '#d4edda' : '#f8d7da',
-                          color: d.correta ? '#155724' : '#721c24',
+                          backgroundColor: d.correta ? cores.tealFundo : cores.perigoFundo,
+                          color: d.correta ? cores.sucessoTexto : cores.perigoTexto,
                         }}
                       >
                         {d.respostaDada
@@ -432,7 +434,7 @@ detalhes.forEach((d) => {
             </Link>
           </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -440,45 +442,35 @@ detalhes.forEach((d) => {
 }
 
 const styles = {
-  container: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  },
   header: {
-    maxWidth: '800px',
-    margin: '0 auto 20px auto',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: cores.branco,
+    border: '1px solid ' + cores.borda,
     padding: '15px 20px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    borderRadius: '10px',
+    marginBottom: '20px',
   },
   progresso: {
     fontWeight: '600',
-    color: '#333',
+    color: cores.texto,
     fontSize: '14px',
   },
   cronometro: {
     fontWeight: '700',
-    color: '#dc3545',
+    color: cores.aviso,
     fontSize: '18px',
     fontFamily: 'monospace',
   },
   placar: {
     fontWeight: '600',
-    color: '#28a745',
+    color: cores.teal,
     fontSize: '13px',
   },
   card: {
-    maxWidth: '800px',
-    margin: '0 auto',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    ...estilosBase.card,
+    padding: '28px',
   },
   tags: {
     display: 'flex',
@@ -486,18 +478,11 @@ const styles = {
     marginBottom: '20px',
     flexWrap: 'wrap',
   },
-  tag: {
-    padding: '4px 12px',
-    backgroundColor: '#e7f3ff',
-    color: '#007bff',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: '600',
-  },
+  tag: estilosBase.tag,
   enunciado: {
     fontSize: '17px',
     lineHeight: '1.6',
-    color: '#333',
+    color: cores.texto,
     marginBottom: '20px',
   },
   imagensContainer: {
@@ -509,7 +494,7 @@ const styles = {
   imagemQuestao: {
     maxWidth: '100%',
     borderRadius: '8px',
-    border: '1px solid #ddd',
+    border: '1px solid ' + cores.borda,
   },
   alternativas: {
     display: 'flex',
@@ -520,55 +505,50 @@ const styles = {
   alternativa: {
     padding: '15px',
     textAlign: 'left',
-    border: '2px solid #ddd',
+    border: '1.5px solid ' + cores.borda,
     borderRadius: '8px',
-    backgroundColor: 'white',
+    backgroundColor: cores.branco,
     cursor: 'pointer',
     fontSize: '15px',
     lineHeight: '1.4',
+    fontFamily: 'inherit',
+    color: cores.texto,
   },
   alternativaSelecionada: {
-    borderColor: '#007bff',
-    backgroundColor: '#e7f3ff',
+    borderColor: cores.teal,
+    backgroundColor: cores.tealFundo,
   },
   navegacao: {
     display: 'flex',
     gap: '10px',
   },
   botaoNav: {
+    ...estilosBase.botaoSecundario,
     flex: 1,
     padding: '15px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
+    fontSize: '15px',
+    textAlign: 'center',
   },
   botaoProxima: {
+    ...estilosBase.botaoPrimario,
     flex: 2,
     padding: '15px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
+    fontSize: '15px',
   },
   cardResultado: {
-    maxWidth: '800px',
-    margin: '0 auto',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '30px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    ...estilosBase.card,
+    padding: '28px',
   },
   tituloResultado: {
-    fontSize: '24px',
+    fontSize: '22px',
     marginBottom: '20px',
-    color: '#333',
+    color: cores.texto,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  textoSalvando: {
+    fontSize: '12px',
+    color: cores.textoSecundario,
     textAlign: 'center',
   },
   gridResumo: {
@@ -580,24 +560,20 @@ const styles = {
   resumoItem: {
     textAlign: 'center',
     padding: '15px 10px',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: cores.fundoPagina,
     borderRadius: '8px',
   },
   resumoValor: {
     fontSize: '24px',
     fontWeight: '700',
-    color: '#333',
+    color: cores.texto,
   },
   resumoLabel: {
     fontSize: '12px',
-    color: '#666',
+    color: cores.textoSecundario,
     marginTop: '5px',
   },
-  subtitulo: {
-    fontSize: '16px',
-    color: '#333',
-    marginBottom: '10px',
-  },
+  subtitulo: estilosBase.subtitulo,
   listaAreas: {
     marginBottom: '20px',
   },
@@ -605,29 +581,25 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     padding: '10px',
-    borderBottom: '1px solid #eee',
+    borderBottom: '1px solid ' + cores.borda,
     fontSize: '14px',
+    color: cores.texto,
   },
   itemAreaValor: {
-    fontWeight: '600',
-    color: '#007bff',
+    fontWeight: '700',
   },
   itemSubareaArea: {
-  fontSize: '11px',
-  color: '#999',
-  marginLeft: '5px',
-},
+    fontSize: '11px',
+    color: cores.textoSecundario,
+    marginLeft: '5px',
+  },
   botaoSecundario: {
+    ...estilosBase.botaoSecundario,
     width: '100%',
     padding: '12px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
     fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
     marginBottom: '20px',
+    textAlign: 'center',
   },
   detalhesLista: {
     display: 'flex',
@@ -636,14 +608,14 @@ const styles = {
     marginBottom: '20px',
   },
   detalheCard: {
-    border: '1px solid #eee',
+    border: '1px solid ' + cores.borda,
     borderRadius: '8px',
     padding: '15px',
   },
   enunciadoDetalhe: {
     fontSize: '14px',
     lineHeight: '1.5',
-    color: '#333',
+    color: cores.texto,
     marginBottom: '12px',
   },
   alternativasDetalhe: {
@@ -653,17 +625,18 @@ const styles = {
   },
   alternativaDetalheItem: {
     padding: '10px',
-    border: '1px solid #ddd',
+    border: '1px solid ' + cores.borda,
     borderRadius: '6px',
     fontSize: '13px',
+    color: cores.texto,
   },
   alternativaCorreta: {
-    borderColor: '#28a745',
-    backgroundColor: '#d4edda',
+    borderColor: cores.teal,
+    backgroundColor: cores.tealFundo,
   },
   alternativaErrada: {
-    borderColor: '#dc3545',
-    backgroundColor: '#f8d7da',
+    borderColor: cores.perigo,
+    backgroundColor: cores.perigoFundo,
   },
   botoesFinais: {
     display: 'flex',
@@ -673,22 +646,24 @@ const styles = {
     flex: 1,
     textAlign: 'center',
     padding: '14px',
-    backgroundColor: '#007bff',
-    color: 'white',
+    backgroundColor: cores.teal,
+    color: cores.branco,
     borderRadius: '8px',
     textDecoration: 'none',
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: '15px',
   },
   botaoFinalSecundario: {
     flex: 1,
     textAlign: 'center',
     padding: '14px',
-    backgroundColor: '#6c757d',
-    color: 'white',
+    backgroundColor: cores.branco,
+    color: cores.texto,
+    border: '1px solid ' + cores.borda,
     borderRadius: '8px',
     textDecoration: 'none',
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: '15px',
+    boxSizing: 'border-box',
   },
 };
