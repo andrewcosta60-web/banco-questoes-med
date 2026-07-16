@@ -7,7 +7,12 @@ import {
   montarCalendarioAtividade,
   calcularSequenciaAtual,
 } from '../services/estatisticasService';
-import { buscarRotacoesAtivas } from '../services/rotacoesService';
+import {
+  buscarRotacoesAtivas,
+  areasAtivasHoje,
+  calcularMetaHoje,
+  questoesFeitasHoje,
+} from '../services/rotacoesService';
 import { buscarRanking } from '../services/rankingService';
 
 // ---------- Icones (SVG simples, sem dependencia externa) ----------
@@ -32,7 +37,6 @@ const icones = {
   fogo: <><path d="M12 3s-4 4-4 8.5A4 4 0 0 0 12 16a4 4 0 0 0 4-4.5C16 9 14.5 8 14.5 8s.5 2-1 3c.3-2-1.5-3.5-1.5-5.5C12 4.5 12 3 12 3Z" /><path d="M9 16.5a3 3 0 0 0 6 0" /></>,
   trofeu: <><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" /><path d="M8 5H5.5A2.5 2.5 0 0 0 5 9.9L8 11M16 5h2.5A2.5 2.5 0 0 1 19 9.9L16 11" /><path d="M12 12v3.5M9 20h6M10 15.5h4v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-2Z" /></>,
 };
-
 
 export default function Dashboard() {
   const { usuario, logout } = useAuth();
@@ -111,7 +115,6 @@ export default function Dashboard() {
     return '#E9ECEF';
   };
 
-  // Agrupa o calendario em semanas de 7 dias para exibir em grade
   const semanas = [];
   for (let i = 0; i < calendario.length; i += 7) {
     semanas.push(calendario.slice(i, i + 7));
@@ -157,19 +160,19 @@ export default function Dashboard() {
         </nav>
 
         <div className="app-sidebar-rodape" style={styles.rodapeSidebar}>
-  <Link to="/editar-perfil" style={styles.navItemRodape}>
-    <Icone path={icones.engrenagem} />
-    <span>Meu Perfil</span>
-  </Link>
-  <Link to="/admin" style={styles.navItemRodape}>
-    <Icone path={icones.engrenagem} />
-    <span>Admin</span>
-  </Link>
-  <button onClick={handleLogout} style={styles.navItemRodapeBotao}>
-    <Icone path={icones.sair} />
-    <span>Sair</span>
-  </button>
-</div>
+          <Link to="/editar-perfil" style={styles.navItemRodape}>
+            <Icone path={icones.engrenagem} />
+            <span>Meu Perfil</span>
+          </Link>
+          <Link to="/admin" style={styles.navItemRodape}>
+            <Icone path={icones.engrenagem} />
+            <span>Admin</span>
+          </Link>
+          <button onClick={handleLogout} style={styles.navItemRodapeBotao}>
+            <Icone path={icones.sair} />
+            <span>Sair</span>
+          </button>
+        </div>
       </div>
 
       {/* CONTEUDO PRINCIPAL */}
@@ -177,7 +180,9 @@ export default function Dashboard() {
         <div style={styles.cabecalho}>
           <div>
             <p style={styles.saudacaoPequena}>Bem-vindo de volta</p>
-            <h1 style={styles.saudacaoNome}>{usuario?.nome || 'Estudante'}</h1>
+            <h1 style={styles.saudacaoNome}>
+              {usuario?.apelido && usuario.apelido.trim() ? usuario.apelido : (usuario?.nome || 'Estudante')}
+            </h1>
           </div>
         </div>
 
@@ -185,7 +190,7 @@ export default function Dashboard() {
           <div style={styles.carregandoBox}>Carregando seus dados...</div>
         ) : (
           <div className="app-layout-colunas" style={styles.layoutColunas}>
-            {/* COLUNA ESQUERDA/CENTRAL: conteudo original */}
+            {/* COLUNA ESQUERDA/CENTRAL */}
             <div style={styles.colunaEsquerda}>
               <div style={styles.gridStats}>
                 <div style={styles.statCard}>
@@ -203,6 +208,54 @@ export default function Dashboard() {
                   <span style={styles.statValor}>{rotacoesAtivas.length}</span>
                 </div>
               </div>
+
+              {rotacoesAtivas.length > 0 && (
+                <div style={{ marginBottom: '28px' }}>
+                  <h2 style={styles.subtitulo}>Suas Rotacoes Ativas</h2>
+                  <div style={styles.gridRotacoes}>
+                    {rotacoesAtivas.map((rotacao) => {
+                      const areas = areasAtivasHoje(rotacao);
+                      const meta = calcularMetaHoje(rotacao);
+                      const feitas = questoesFeitasHoje(rotacao);
+                      const pct = Math.min(100, Math.round((feitas / meta) * 100));
+
+                      return (
+                        <div key={rotacao.id} style={styles.rotacaoCard}>
+                          <div style={styles.rotacaoTopo}>
+                            <span style={styles.rotacaoNome}>{rotacao.nome}</span>
+                            <span style={styles.rotacaoBadge}>
+                              {rotacao.modo === 'misturado' ? 'Misturado' : 'Blocos'}
+                            </span>
+                          </div>
+
+                          <p style={styles.rotacaoArea}>
+                            {areas.length > 0 ? areas.join(', ') : 'Nenhum bloco ativo hoje'}
+                          </p>
+
+                          <div style={styles.rotacaoProgressoLinha}>
+                            <div style={styles.rotacaoBarraFundo}>
+                              <div
+                                style={{
+                                  ...styles.rotacaoBarraPreenchida,
+                                  width: pct + '%',
+                                  backgroundColor: pct >= 100 ? '#2F8F7A' : '#D6893F',
+                                }}
+                              />
+                            </div>
+                            <span style={styles.rotacaoProgressoTexto}>
+                              {feitas} / {meta} hoje
+                            </span>
+                          </div>
+
+                          <Link to={'/rotacao/' + rotacao.id} style={styles.rotacaoBotao}>
+                            Continuar
+                          </Link>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {(melhorArea || piorArea) && (
                 <div style={styles.destaquesLinha}>
@@ -247,7 +300,6 @@ export default function Dashboard() {
 
             {/* COLUNA DIREITA: widgets */}
             <div className="app-coluna-direita" style={styles.colunaDireita}>
-              {/* SEQUENCIA */}
               <div style={styles.widgetCard}>
                 <div style={styles.streakLinha}>
                   <div style={styles.streakIcone}>
@@ -262,7 +314,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* CALENDARIO DE ATIVIDADE */}
               <div style={styles.widgetCard}>
                 <h3 style={styles.widgetTitulo}>Atividade recente</h3>
                 <div style={styles.calendarioGrid}>
@@ -294,7 +345,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* RANKING */}
               <div style={styles.widgetCard}>
                 <div style={styles.widgetTituloLinha}>
                   <Icone path={icones.trofeu} />
@@ -503,6 +553,72 @@ const styles = {
     color: '#16232E',
   },
 
+  gridRotacoes: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+    gap: '12px',
+  },
+  rotacaoCard: {
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #E3E7EC',
+    borderRadius: '10px',
+    padding: '16px',
+  },
+  rotacaoTopo: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '6px',
+  },
+  rotacaoNome: {
+    fontWeight: '700',
+    fontSize: '14px',
+    color: '#16232E',
+  },
+  rotacaoBadge: {
+    padding: '2px 9px',
+    backgroundColor: '#E7F2EF',
+    color: '#2F8F7A',
+    borderRadius: '12px',
+    fontSize: '10.5px',
+    fontWeight: '700',
+  },
+  rotacaoArea: {
+    fontSize: '12.5px',
+    color: '#6B7785',
+    marginBottom: '12px',
+  },
+  rotacaoProgressoLinha: {
+    marginBottom: '12px',
+  },
+  rotacaoBarraFundo: {
+    width: '100%',
+    height: '8px',
+    backgroundColor: '#E9ECEF',
+    borderRadius: '4px',
+    overflow: 'hidden',
+    marginBottom: '5px',
+  },
+  rotacaoBarraPreenchida: {
+    height: '100%',
+    transition: 'width 0.3s',
+  },
+  rotacaoProgressoTexto: {
+    fontSize: '11.5px',
+    color: '#8A94A0',
+  },
+  rotacaoBotao: {
+    display: 'block',
+    textAlign: 'center',
+    padding: '9px',
+    backgroundColor: '#16232E',
+    color: 'white',
+    borderRadius: '7px',
+    textDecoration: 'none',
+    fontWeight: '600',
+    fontSize: '13px',
+  },
+
   destaquesLinha: {
     display: 'flex',
     flexWrap: 'wrap',
@@ -601,7 +717,6 @@ const styles = {
     flexShrink: 0,
   },
 
-  // WIDGETS COLUNA DIREITA
   widgetCard: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #E3E7EC',
