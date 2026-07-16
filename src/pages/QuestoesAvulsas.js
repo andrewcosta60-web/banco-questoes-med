@@ -19,6 +19,7 @@ export default function QuestoesAvulsas() {
   const [questoes, setQuestoes] = useState([]);
   const [indiceAtual, setIndiceAtual] = useState(0);
   const [respostasPorIndice, setRespostasPorIndice] = useState({}); // { 0: 'B', 2: 'A', ... }
+  const [eliminadas, setEliminadas] = useState({});
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [tempoInicio, setTempoInicio] = useState(Date.now());
@@ -154,7 +155,15 @@ export default function QuestoesAvulsas() {
       subarea: questaoAtual.subarea,
     }).catch((err) => console.error('Erro ao salvar resposta:', err));
   };
-
+const toggleEliminada = (letra) => {
+  setEliminadas((prev) => {
+    const atuais = prev[indiceAtual] || [];
+    const novasEliminadas = atuais.includes(letra)
+      ? atuais.filter((l) => l !== letra)
+      : [...atuais, letra];
+    return { ...prev, [indiceAtual]: novasEliminadas };
+  });
+};
   const handleAnterior = () => {
     if (indiceAtual > 0) {
       setIndiceAtual((prev) => prev - 1);
@@ -346,31 +355,49 @@ export default function QuestoesAvulsas() {
         )}
 
         <div style={styles.alternativas}>
-          {alternativas.map((alt) => {
-            if (!alt.texto) return null;
+  {alternativas.map((alt) => {
+    if (!alt.texto) return null;
 
-            let estiloAlternativa = { ...styles.alternativa };
+    const estaEliminada = (eliminadas[indiceAtual] || []).includes(alt.letra);
+    let estiloAlternativa = { ...styles.alternativa };
 
-            if (mostrarResultado) {
-              if (alt.letra === questaoAtual.gabarito) {
-                estiloAlternativa = { ...estiloAlternativa, ...styles.alternativaCorreta };
-              } else if (alt.letra === respostaSelecionada) {
-                estiloAlternativa = { ...estiloAlternativa, ...styles.alternativaErrada };
-              }
-            }
+    if (mostrarResultado) {
+      if (alt.letra === questaoAtual.gabarito) {
+        estiloAlternativa = { ...estiloAlternativa, ...styles.alternativaCorreta };
+      } else if (alt.letra === respostaSelecionada) {
+        estiloAlternativa = { ...estiloAlternativa, ...styles.alternativaErrada };
+      }
+    } else if (estaEliminada) {
+      estiloAlternativa = { ...estiloAlternativa, ...styles.alternativaEliminada };
+    }
 
-            return (
-              <button
-                key={alt.letra}
-                onClick={() => handleResponder(alt.letra)}
-                style={estiloAlternativa}
-                disabled={mostrarResultado}
-              >
-                <strong>{alt.letra})</strong> {alt.texto}
-              </button>
-            );
-          })}
-        </div>
+    return (
+      <div key={alt.letra} style={styles.linhaAlternativa}>
+        <button
+          onClick={() => handleResponder(alt.letra)}
+          style={{ ...estiloAlternativa, flex: 1 }}
+          disabled={mostrarResultado}
+        >
+          <strong>{alt.letra})</strong>{' '}
+          <span style={estaEliminada ? styles.textoRiscado : {}}>{alt.texto}</span>
+        </button>
+        {!mostrarResultado && (
+          <button
+            type="button"
+            onClick={() => toggleEliminada(alt.letra)}
+            style={{
+              ...styles.btnEliminar,
+              ...(estaEliminada ? styles.btnEliminarAtivo : {}),
+            }}
+            title={estaEliminada ? 'Desfazer eliminacao' : 'Eliminar esta alternativa'}
+          >
+            X
+          </button>
+        )}
+      </div>
+    );
+  })}
+</div>
 
         {mostrarResultado && (
           <div
@@ -586,4 +613,32 @@ const styles = {
     backgroundColor: cores.tealFundo,
     color: cores.teal,
   },
+linhaAlternativa: {
+  display: 'flex',
+  alignItems: 'stretch',
+  gap: '8px',
+},
+alternativaEliminada: {
+  opacity: 0.5,
+  backgroundColor: '#F5F7FA',
+},
+textoRiscado: {
+  textDecoration: 'line-through',
+},
+btnEliminar: {
+  width: '38px',
+  flexShrink: 0,
+  border: '2px solid #ddd',
+  borderRadius: '8px',
+  backgroundColor: 'white',
+  color: '#999',
+  fontWeight: '700',
+  cursor: 'pointer',
+  fontSize: '14px',
+},
+btnEliminarAtivo: {
+  borderColor: '#D64545',
+  backgroundColor: '#FBEAEA',
+  color: '#D64545',
+},
 };

@@ -125,3 +125,46 @@ export function calcularSequenciaAtual(respostas) {
 
   return sequencia;
 }
+// Agrupa as respostas por semana e calcula o % de acerto de cada semana
+// Retorna as ultimas N semanas (padrao 8), para mostrar a evolucao
+export function calcularEvolucaoSemanal(respostas, numeroDeSemanas = 8) {
+  // Descobre o inicio de cada semana (domingo) para os ultimos N periodos
+  function inicioDaSemana(data) {
+    const d = new Date(data);
+    const diaSemana = d.getDay();
+    d.setDate(d.getDate() - diaSemana);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  const hoje = new Date();
+  const semanas = [];
+
+  for (let i = numeroDeSemanas - 1; i >= 0; i--) {
+    const referencia = new Date(hoje);
+    referencia.setDate(referencia.getDate() - i * 7);
+    const inicio = inicioDaSemana(referencia);
+    const fim = new Date(inicio);
+    fim.setDate(fim.getDate() + 7);
+
+    semanas.push({ inicio, fim, total: 0, acertos: 0 });
+  }
+
+  respostas.forEach((r) => {
+    if (!r.dataCriacao) return;
+    const dataResposta = new Date(r.dataCriacao);
+
+    const semana = semanas.find((s) => dataResposta >= s.inicio && dataResposta < s.fim);
+    if (semana) {
+      semana.total += 1;
+      if (r.correta) semana.acertos += 1;
+    }
+  });
+
+  return semanas.map((s) => ({
+    label: `${String(s.inicio.getDate()).padStart(2, '0')}/${String(s.inicio.getMonth() + 1).padStart(2, '0')}`,
+    total: s.total,
+    acertos: s.acertos,
+    percentual: s.total > 0 ? Math.round((s.acertos / s.total) * 100) : null,
+  }));
+}

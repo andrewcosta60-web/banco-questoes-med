@@ -1,12 +1,74 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
-import { buscarTodasRespostas, calcularEstatisticas } from '../services/estatisticasService';
+import { buscarTodasRespostas, calcularEstatisticas, calcularEvolucaoSemanal } from '../services/estatisticasService';
 import Layout from '../components/Layout';
 import { cores, estilosBase } from '../styles/theme';
 
+function GraficoEvolucao({ dados }) {
+  const largura = 600;
+  const altura = 180;
+  const padding = 30;
+  const larguraBarra = (largura - padding * 2) / dados.length;
+
+  const maiorTotal = Math.max(...dados.map((d) => d.total), 1);
+
+  const corPorPercentual = (pct) => {
+    if (pct === null) return '#E9ECEF';
+    if (pct >= 60) return '#2F8F7A';
+    return '#D6893F';
+  };
+
+  return (
+    <svg viewBox={`0 0 ${largura} ${altura + 30}`} style={{ width: '100%', height: 'auto' }}>
+      {dados.map((d, i) => {
+        const alturaBarra = d.total > 0 ? (d.total / maiorTotal) * (altura - 20) : 2;
+        const x = padding + i * larguraBarra + larguraBarra * 0.15;
+        const larguraReal = larguraBarra * 0.7;
+        const y = altura - alturaBarra;
+
+        return (
+          <g key={i}>
+            <rect
+              x={x}
+              y={y}
+              width={larguraReal}
+              height={alturaBarra}
+              rx={4}
+              fill={corPorPercentual(d.percentual)}
+            />
+            {d.percentual !== null && (
+              <text
+                x={x + larguraReal / 2}
+                y={y - 6}
+                textAnchor="middle"
+                fontSize="11"
+                fontWeight="700"
+                fill="#16232E"
+              >
+                {d.percentual}%
+              </text>
+            )}
+            <text
+              x={x + larguraReal / 2}
+              y={altura + 18}
+              textAnchor="middle"
+              fontSize="10.5"
+              fill="#8A94A0"
+            >
+              {d.label}
+            </text>
+          </g>
+        );
+      })}
+      <line x1={padding} y1={altura} x2={largura - padding} y2={altura} stroke="#E3E7EC" strokeWidth="1" />
+    </svg>
+  );
+}
+
 export default function Estatisticas() {
   const [stats, setStats] = useState(null);
+  const [evolucao, setEvolucao] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [ordenarPor, setOrdenarPor] = useState('pior'); // 'pior' ou 'melhor'
@@ -16,17 +78,18 @@ export default function Estatisticas() {
 
   useEffect(() => {
     async function carregar() {
-      try {
-        setCarregando(true);
-        const respostas = await buscarTodasRespostas(usuario.uid);
-        const calculado = calcularEstatisticas(respostas);
-        setStats(calculado);
-      } catch (error) {
-        setErro('Erro ao carregar estatisticas: ' + error.message);
-      } finally {
-        setCarregando(false);
-      }
-    }
+  try {
+    setCarregando(true);
+    const respostas = await buscarTodasRespostas(usuario.uid);
+    const calculado = calcularEstatisticas(respostas);
+    setStats(calculado);
+    setEvolucao(calcularEvolucaoSemanal(respostas, 8));
+  } catch (error) {
+    setErro('Erro ao carregar estatisticas: ' + error.message);
+  } finally {
+    setCarregando(false);
+  }
+}
     carregar();
   }, [usuario.uid]);
 
@@ -86,7 +149,20 @@ export default function Estatisticas() {
         </button>
         <h2 style={styles.titulo}>Estatisticas</h2>
       </div>
+{/* GRAFICO DE EVOLUCAO */}
+<div style={styles.card}>
+  <h3 style={styles.subtitulo}>Evolucao (ultimas 8 semanas)</h3>
+  {evolucao.some((e) => e.total > 0) ? (
+    <GraficoEvolucao dados={evolucao} />
+  ) : (
+    <p style={{ fontSize: '13px', color: '#8A94A0' }}>
+      Ainda nao ha dados suficientes para mostrar a evolucao.
+    </p>
+  )}
+</div>
 
+{/* RESUMO GERAL */}
+<div style={styles.card}></div>
       {/* RESUMO GERAL */}
       <div style={styles.card}>
         <div style={styles.gridResumo}>
