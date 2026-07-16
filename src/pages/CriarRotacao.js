@@ -9,8 +9,10 @@ import { cores, estilosBase } from '../styles/theme';
 export default function CriarRotacao() {
 
   const [nome, setNome] = useState('');
-  const [cronogramasDisponiveis, setCronogramasDisponiveis] = useState([]);
-  const [cronogramaEscolhidoId, setCronogramaEscolhidoId] = useState('');
+ // eslint-disable-next-line no-unused-vars
+const [cronogramasDisponiveis, setCronogramasDisponiveis] = useState([]);
+// eslint-disable-next-line no-unused-vars
+const [cronogramaEscolhidoId, setCronogramaEscolhidoId] = useState('');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
   const [metaBase, setMetaBase] = useState(20);

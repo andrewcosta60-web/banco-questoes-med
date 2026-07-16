@@ -26,8 +26,9 @@ export default function Cronogramas() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    carregarCronogramas();
-  }, []);
+  carregarCronogramas();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   async function carregarCronogramas() {
     try {

@@ -33,7 +33,6 @@ const icones = {
   trofeu: <><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" /><path d="M8 5H5.5A2.5 2.5 0 0 0 5 9.9L8 11M16 5h2.5A2.5 2.5 0 0 1 19 9.9L16 11" /><path d="M12 12v3.5M9 20h6M10 15.5h4v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-2Z" /></>,
 };
 
-const NOMES_DIA_SEMANA = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
 export default function Dashboard() {
   const { usuario, logout } = useAuth();
@@ -176,13 +175,11 @@ export default function Dashboard() {
       {/* CONTEUDO PRINCIPAL */}
       <div className="app-main" style={styles.main}>
         <div style={styles.cabecalho}>
-  <div>
-    <p style={styles.saudacaoPequena}>Bem-vindo de volta</p>
-    <h1 style={styles.saudacaoNome}>
-      {usuario?.apelido && usuario.apelido.trim() ? usuario.apelido : (usuario?.nome || 'Estudante')}
-    </h1>
-  </div>
-</div>
+          <div>
+            <p style={styles.saudacaoPequena}>Bem-vindo de volta</p>
+            <h1 style={styles.saudacaoNome}>{usuario?.nome || 'Estudante'}</h1>
+          </div>
+        </div>
 
         {carregando ? (
           <div style={styles.carregandoBox}>Carregando seus dados...</div>
