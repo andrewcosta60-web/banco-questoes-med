@@ -17,6 +17,7 @@ export default function EditorQuestoes() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [busca, setBusca] = useState('');
+  const [apenasIncompletas, setApenasIncompletas] = useState(false);
   const [areaSelecionada, setAreaSelecionada] = useState('TODAS');
   const [subareaSelecionada, setSubareaSelecionada] = useState('TODAS');
 
@@ -181,19 +182,32 @@ export default function EditorQuestoes() {
   };
 
   const questoesFiltradas = questoes
-    .filter((q) => areaSelecionada === 'TODAS' || q.area === areaSelecionada)
-    .filter((q) => subareaSelecionada === 'TODAS' || q.subarea === subareaSelecionada)
-    .filter((q) => {
-      if (!busca.trim()) return true;
-      const termo = busca.trim().toLowerCase();
+  .filter((q) => areaSelecionada === 'TODAS' || q.area === areaSelecionada)
+  .filter((q) => subareaSelecionada === 'TODAS' || q.subarea === subareaSelecionada)
+  .filter((q) => {
+    if (!apenasIncompletas) return true;
+    return (
+      !q.enunciado ||
+      !q.enunciado.trim() ||
+      !q.alternativaA ||
+      !q.alternativaA.trim() ||
+      !q.alternativaB ||
+      !q.alternativaB.trim() ||
+      !q.gabarito ||
+      !q.gabarito.trim()
+    );
+  })
+  .filter((q) => {
+    if (!busca.trim()) return true;
+    const termo = busca.trim().toLowerCase();
 
-      return (
-        String(q.numero).includes(termo) ||
-        (q.area || '').toLowerCase().includes(termo) ||
-        (q.subarea || '').toLowerCase().includes(termo) ||
-        (q.enunciado || '').toLowerCase().includes(termo)
-      );
-    });
+    return (
+      String(q.numero).includes(termo) ||
+      (q.area || '').toLowerCase().includes(termo) ||
+      (q.subarea || '').toLowerCase().includes(termo) ||
+      (q.enunciado || '').toLowerCase().includes(termo)
+    );
+  });
 
   if (carregando) {
     return (
@@ -218,8 +232,27 @@ export default function EditorQuestoes() {
         {erro && <div style={styles.erroBox}>{erro}</div>}
 
         <div style={styles.filtrosContainer}>
-          <div style={styles.formGroupFiltro}>
-            <label style={styles.labelPequeno}>Filtrar por Area</label>
+  <div style={styles.formGroupFiltro}>
+    <label style={styles.labelPequeno}>Status</label>
+    <button
+      type="button"
+      onClick={() => setApenasIncompletas((prev) => !prev)}
+      style={{
+        ...styles.inputBusca,
+        cursor: 'pointer',
+        textAlign: 'left',
+        backgroundColor: apenasIncompletas ? '#FBEAEA' : 'white',
+        color: apenasIncompletas ? '#B33A3A' : '#333',
+        fontWeight: apenasIncompletas ? '700' : '400',
+        border: apenasIncompletas ? '1px solid #F0C4C4' : '1px solid #ddd',
+      }}
+    >
+      {apenasIncompletas ? 'Mostrando so incompletas ✕' : 'Mostrar so incompletas'}
+    </button>
+  </div>
+
+  <div style={styles.formGroupFiltro}>
+    <label style={styles.labelPequeno}>Filtrar por Area</label>
             <select
               value={areaSelecionada}
               onChange={(e) => handleTrocarArea(e.target.value)}
